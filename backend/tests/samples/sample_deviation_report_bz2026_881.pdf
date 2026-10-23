@@ -1,0 +1,58 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 1405 >>
+stream
+BT
+/F1 10 Tf
+50 750 Td
+14 TL
+(PHARMACEUTICAL DEVIATION INVESTIGATION REPORT) Tj
+T* (Document ID: DEV-2026-0881) Tj
+T* (Site: Vertex API Manufacturing Facility 2) Tj
+T* (Date: 2026-10-22) Tj
+T* (Batch Number: BZ-2026-881) Tj
+T* (Product: Benztropine Mesylate API) Tj
+T* (Process Step: Vacuum Tray Drying \(Dryer VTD-03\)) Tj
+T* (Severity: Major) Tj
+T* () Tj
+T* (DEVIATION DESCRIPTION:) Tj
+T* (During final quality release testing, Batch BZ-2026-881 exhibited residual Acetone of 0.72% w/w by gas chromatography, exceeding the finished API acceptance specification of <= 0.50% w/w. ) Tj
+T* () Tj
+T* (PROCESS OBSERVATIONS:) Tj
+T* (Drying was scheduled for 16 hours at 45C under 15 mbar vacuum in Dryer VTD-03. At hour 09:15, cooling water recirculator valve CV-102 failed closed, causing condenser cooling water temperature to spike to 28C against the maximum limit of 10C for 3.5 hours. Lower trays retained significant moisture and residual solvent.) Tj
+T* () Tj
+T* (POTENTIAL CONTRIBUTING FACTORS:) Tj
+T* (1. Equipment: Chilled water valve CV-102 actuator diaphragm fatigue.) Tj
+T* (2. Method: Absence of automatic audible interlock when condenser temperature exceeds 15C.) Tj
+T* (3. Measurement: Thermocouple TT-09 on lower shelf showed sluggish response during temperature ramp.) Tj
+T* () Tj
+T* (RECOMMENDED IMMEDIATE ACTION:) Tj
+T* (Quarantine Batch BZ-2026-881 in warehouse secure holding area.) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000244 00000 n 
+0000000350 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+431
+%%EOF
