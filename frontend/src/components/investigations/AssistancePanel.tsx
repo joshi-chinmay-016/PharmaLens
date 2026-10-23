@@ -31,6 +31,7 @@ import {
   Lock,
   ShieldAlert,
   ArrowRight,
+  Upload,
 } from 'lucide-react';
 import {
   Investigation,
