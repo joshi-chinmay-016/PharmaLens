@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.core.database import Base, engine
-from app.api import health, investigations, sources
+from app.api import health, investigations, sources, ai
 
 # Initialize database schema
 Base.metadata.create_all(bind=engine)
@@ -46,6 +46,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 app.include_router(health.router, prefix=settings.API_V1_STR)
 app.include_router(investigations.router, prefix=settings.API_V1_STR)
 app.include_router(sources.router, prefix=settings.API_V1_STR)
+app.include_router(ai.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():

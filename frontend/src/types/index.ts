@@ -131,3 +131,159 @@ export interface HealthResponse {
   database: string;
   phase: string;
 }
+
+// ==========================================
+// Phase 2 AI Intelligence & Contract Types
+// ==========================================
+
+export interface ExtractedFact {
+  field_name: string;
+  extracted_value: string;
+  confidence_score: number;
+  source_id: string;
+  source_snippet: string | null;
+  verification_status: string;
+  proposed_for_form: boolean;
+  current_form_value?: string | null;
+}
+
+export interface EvidenceGap {
+  gap_id: string;
+  category: string;
+  description: string;
+  why_it_matters: string;
+  recommended_evidence_to_obtain: string;
+  priority: 'High' | 'Medium' | 'Low' | string;
+  status: string;
+  supporting_source_ids: string[];
+}
+
+export interface PotentialRootCause {
+  cause_id: string;
+  title: string;
+  explanation: string;
+  category: string;
+  evidence_for: string[];
+  evidence_against_or_missing: string[];
+  supporting_source_ids: string[];
+  supporting_excerpts: string[];
+  plausibility: string;
+  ranking_rationale: string;
+  investigation_questions: string[];
+  recommended_next_step: string;
+  review_status: 'suggested' | 'under_investigation' | 'supported' | 'rejected' | 'confirmed';
+  is_confirmed_by_human: boolean;
+}
+
+export interface FiveWhysStep {
+  level: number;
+  question: string;
+  answer: string;
+  status: 'supported' | 'tentative' | 'unresolved';
+  supporting_evidence: string | null;
+  source_id: string | null;
+  missing_evidence_to_verify: string | null;
+}
+
+export interface FiveWhysAnalysis {
+  problem_statement: string;
+  steps: FiveWhysStep[];
+  derived_root_cause_hypothesis: string | null;
+  is_chain_complete: boolean;
+  evidence_limitation_note: string | null;
+}
+
+export interface FishboneCause {
+  cause_id: string;
+  cause: string;
+  category: string;
+  status: 'supported' | 'tentative' | 'unresolved';
+  evidence: string | null;
+  source_id: string | null;
+  verification_action: string | null;
+  review_status: string;
+}
+
+export interface FishboneAnalysis {
+  machine: FishboneCause[];
+  method: FishboneCause[];
+  material: FishboneCause[];
+  measurement: FishboneCause[];
+  milieu_environment: FishboneCause[];
+  manpower_people: FishboneCause[];
+  summary_observations: string | null;
+}
+
+export interface CapaRecommendation {
+  action_id: string;
+  action_type: 'Correction / Containment' | 'Corrective Action' | 'Preventive Action' | string;
+  title: string;
+  description: string;
+  rationale: string;
+  target_root_cause_or_gap: string;
+  expected_outcome: string;
+  suggested_owner_role: string;
+  suggested_priority: 'High' | 'Medium' | 'Low' | string;
+  proposed_due_date?: string | null;
+  effectiveness_check_method: string;
+  evidence_needed_for_closure: string;
+  human_approval_status: 'Proposed' | 'Accepted' | 'Modified' | 'Rejected' | string;
+}
+
+export interface ProvenanceSource {
+  source_id: string;
+  source_type: string;
+  original_filename: string;
+  char_count: number;
+}
+
+export interface InvestigationAIAnalysisContract {
+  investigation_id: number;
+  extracted_facts: ExtractedFact[];
+  missing_fields: string[];
+  evidence_gaps: EvidenceGap[];
+  potential_root_causes: PotentialRootCause[];
+  contributing_factors: string[];
+  five_whys: FiveWhysAnalysis | null;
+  fishbone: FishboneAnalysis | null;
+  capa_recommendations: CapaRecommendation[];
+  analysis_warnings: string[];
+  provenance_sources: ProvenanceSource[];
+  model_metadata: Record<string, any>;
+  disclaimer?: string;
+}
+
+export interface AnalysisResponse {
+  id: number;
+  investigation_id: number;
+  version: number;
+  status: 'pending' | 'running' | 'completed' | 'completed_with_warnings' | 'failed';
+  requested_methods: string;
+  structured_output: InvestigationAIAnalysisContract;
+  user_edits: Record<string, any> | null;
+  confirmed_root_cause: string | null;
+  is_confirmed_by_human: boolean;
+  model_identifier: string;
+  prompt_version: string;
+  created_at: string;
+  completed_at: string | null;
+}
+
+export interface RunAnalysisPayload {
+  include_five_whys?: boolean;
+  include_fishbone?: boolean;
+  include_capa?: boolean;
+}
+
+export interface AnalysisReviewUpdatePayload {
+  confirmed_root_cause?: string;
+  is_confirmed_by_human?: boolean;
+  user_edits_json?: string;
+}
+
+export interface AIHealthResponse {
+  ai_status: string;
+  configured_model: string;
+  supported_methods: string[];
+  max_source_chars: number;
+}

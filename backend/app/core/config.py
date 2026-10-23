@@ -26,9 +26,14 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "./storage/uploads"
     MAX_UPLOAD_SIZE_MB: int = 10
     
-    # Groq API (Planned for Phase 2 integration)
+    # Groq API (Phase 2 AI Integration)
     GROQ_API_KEY: Optional[str] = None
-    GROQ_MODEL: str = "llama-3.3-70b-versatile"
+    GROQ_MODEL: str = "openai/gpt-oss-120b"
+    GROQ_TIMEOUT_SECONDS: int = 60
+    GROQ_MAX_RETRIES: int = 2
+    AI_MAX_SOURCE_CHARS: int = 40000
+    AI_MAX_OUTPUT_TOKENS: int = 5000
+    AI_TEMPERATURE: float = 0.0
     
     model_config = {
         "env_file": [

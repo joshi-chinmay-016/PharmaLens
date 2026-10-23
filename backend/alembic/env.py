@@ -24,6 +24,7 @@ from app.core.config import settings
 from app.core.database import Base
 from app.models.investigation import Investigation
 from app.models.source_document import SourceDocument
+from app.models.investigation_analysis import InvestigationAnalysis
 
 target_metadata = Base.metadata
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)

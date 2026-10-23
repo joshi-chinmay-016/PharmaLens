@@ -48,3 +48,9 @@ class Investigation(Base):
         cascade="all, delete-orphan",
         lazy="selectin"
     )
+    analyses = relationship(
+        "InvestigationAnalysis",
+        back_populates="investigation",
+        cascade="all, delete-orphan",
+        lazy="selectin"
+    )

@@ -148,4 +148,80 @@ export const api = {
     });
     return handleResponse<SourceDocument>(res);
   },
+
+  // ==========================================
+  // Phase 2: AI Investigation & RCA Endpoints
+  // ==========================================
+
+  // Check AI Engine Health & Configured Model
+  async getAiHealth(): Promise<import('../types').AIHealthResponse> {
+    const res = await fetch(`${API_BASE}/ai/health`);
+    return handleResponse<import('../types').AIHealthResponse>(res);
+  },
+
+  // Run Investigation Analysis (LangGraph Workflow)
+  async runAnalysis(
+    investigationId: number,
+    payload?: import('../types').RunAnalysisPayload
+  ): Promise<import('../types').AnalysisResponse> {
+    const res = await fetch(`${API_BASE}/investigations/${investigationId}/analysis`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload || {}),
+    });
+    return handleResponse<import('../types').AnalysisResponse>(res);
+  },
+
+  // Targeted 5 Whys Run
+  async runFiveWhys(investigationId: number): Promise<import('../types').AnalysisResponse> {
+    const res = await fetch(`${API_BASE}/investigations/${investigationId}/analysis/five-whys`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return handleResponse<import('../types').AnalysisResponse>(res);
+  },
+
+  // Targeted Fishbone 6M Run
+  async runFishbone(investigationId: number): Promise<import('../types').AnalysisResponse> {
+    const res = await fetch(`${API_BASE}/investigations/${investigationId}/analysis/fishbone`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return handleResponse<import('../types').AnalysisResponse>(res);
+  },
+
+  // Targeted CAPA Recommendations Run
+  async runCapa(investigationId: number): Promise<import('../types').AnalysisResponse> {
+    const res = await fetch(`${API_BASE}/investigations/${investigationId}/analysis/capa`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return handleResponse<import('../types').AnalysisResponse>(res);
+  },
+
+  // Retrieve Latest Saved Analysis
+  async getLatestAnalysis(investigationId: number): Promise<import('../types').AnalysisResponse> {
+    const res = await fetch(`${API_BASE}/investigations/${investigationId}/analysis`);
+    return handleResponse<import('../types').AnalysisResponse>(res);
+  },
+
+  // Retrieve Full Analysis Version History
+  async getAnalysisHistory(investigationId: number): Promise<import('../types').AnalysisResponse[]> {
+    const res = await fetch(`${API_BASE}/investigations/${investigationId}/analysis/history`);
+    return handleResponse<import('../types').AnalysisResponse[]>(res);
+  },
+
+  // Update Human Review State, Edits, or Confirm Root Cause
+  async updateAnalysisReview(
+    investigationId: number,
+    analysisId: number,
+    payload: import('../types').AnalysisReviewUpdatePayload
+  ): Promise<import('../types').AnalysisResponse> {
+    const res = await fetch(`${API_BASE}/investigations/${investigationId}/analysis/${analysisId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return handleResponse<import('../types').AnalysisResponse>(res);
+  },
 };
