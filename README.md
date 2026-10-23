@@ -1,310 +1,303 @@
 # PharmaLens: AI-Powered Root Cause Analysis & CAPA
-### *See Beyond the Deviation. Investigate with intelligence. Act with evidence.*
+### *See Beyond the Deviation. Investigate with Intelligence. Act with Evidence.*
+
+[![Python](https://img.shields.io/badge/Python-3.12-blue.svg?style=flat-square&logo=python)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-18-61DAFB.svg?style=flat-square&logo=react)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6.svg?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
+[![LangGraph](https://img.shields.io/badge/Orchestrator-LangGraph-FF6F00.svg?style=flat-square)](https://langchain-ai.github.io/langgraph/)
+[![Groq](https://img.shields.io/badge/Inference-Groq_LPU-F55036.svg?style=flat-square)](https://groq.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791.svg?style=flat-square&logo=postgresql)](https://www.postgresql.org)
+[![TailwindCSS](https://img.shields.io/badge/Style-Neo--Brutalist-000000.svg?style=flat-square)](https://tailwindcss.com)
+[![Tests](https://img.shields.io/badge/Tests-34%2F34%20Passing-brightgreen.svg?style=flat-square)]()
 
 ---
 
-## 1. Product Overview
+## 1. Executive Overview
 
-**PharmaLens** is an AI-augmented Root Cause Analysis (RCA) and Corrective and Preventive Action (CAPA) decision-support platform engineered specifically for pharmaceutical Active Pharmaceutical Ingredient (API) manufacturing and quality assurance operations.
+**PharmaLens** is an enterprise-grade AI decision-support platform engineered specifically for pharmaceutical manufacturing, Active Pharmaceutical Ingredient (API) synthesis, and GxP quality assurance operations.
 
-When deviations, Out-Of-Specification (OOS) analytical results, or process anomalies occur, investigators must navigate incomplete initial data, unstructured batch records, and strict regulatory expectations. PharmaLens establishes a rigorous **evidence-before-conclusions** investigative workflow:
+When deviations, Out-of-Specification (OOS) laboratory results, or process anomalies occur, investigators face fragmented data, unstructured batch records, high regulatory stakes, and strict 30-day deviation closure mandates under **FDA 21 CFR 211.192** and **EU GMP Chapter 1**. 
 
-$$\text{Deviation Intake} \longrightarrow \text{Evidence Capture} \longrightarrow \text{Fact Extraction} \longrightarrow \text{Evidence Gaps} \longrightarrow \text{Hypotheses (5 Whys / 6M)} \longrightarrow \text{CAPA Engine} \longrightarrow \text{Human Review \& Signoff}$$
+PharmaLens eliminates chaotic, speculative investigation workflows by enforcing an **evidence-first investigative methodology**. Combining local document intelligence (PyPDF) with a stateful **LangGraph multi-agent orchestration engine**, PharmaLens parses raw deviation reports, pinpoints empirical evidence gaps, reconstructs deductive **5 Whys** chains, populates **Ishikawa (6M)** fishbones, and formulates verifiable **CAPA** (Corrective and Preventive Action) programs—all under strict **Human-in-the-Loop** control.
 
----
+```
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 THE PHARMALENS INVESTIGATION LIFECYCLE                                 │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-## 2. Phase 3 Production Hardening & Architectural Additions
-
-Phase 3 achieves complete production-quality hardening across the application lifecycle, compliance auditability, and human-in-the-loop governance:
-
-1. **Formal 5-State Investigation Lifecycle:**
-   - `Draft`: Initial intake and incident framing.
-   - `Under Investigation`: Empirical source evidence and records collection.
-   - `AI Analysis Available`: LangGraph multi-node reasoning completed; awaiting human review.
-   - `In Review`: Active quality review, hypothesis evaluation, and CAPA formulation.
-   - `Completed`: Investigation formally closed by quality authority.
-   - *Lifecycle Controls:* Strict state-transition validation rules, completion guards requiring a confirmed root cause and zero unaddressed evidence gaps, immutability locking of completed records, and an explicit reopen endpoint requiring documented regulatory justification.
-
-2. **Append-Only Compliance Audit Trail (`investigation_audit_logs`):**
-   - Immutably captures every material business and investigative action: investigation creation, updates, lifecycle transitions, reopenings, source attachments and detachments, AI analysis executions, fact corrections/applications, and granular review decisions on causes, CAPAs, and gaps.
-   - Preserves actor attribution, UTC timestamps, entity references, action summaries, and detailed payload diffs without exposing credentials or internal prompts.
-   - Accessible via `GET /api/investigations/{id}/audit-logs` and a dedicated UI panel with interactive payload inspector.
-
-3. **Source Evidence Provenance & Cross-Investigation Isolation:**
-   - Multi-format ingestion (`pasted_text`, `email`, `pdf`) with text extraction and scanned document detection.
-   - Strict source isolation preventing cross-investigation leakage or source document hijacking (returns HTTP 409 Conflict if attempting to reassign attached sources).
-   - Source document detachment endpoint (`PATCH /api/sources/{id}/detach`) with audit event tracking.
-
-4. **Human-in-the-Loop Review & Fact Correction:**
-   - Fact verification endpoint (`POST /api/investigations/{id}/analysis/{analysis_id}/apply-fact`) applying verified facts to the master investigation record with old/new value audit trails.
-   - Potential root causes provide the full triad of reviewer decisions: *Accept as Confirmed Finding*, *Reject Hypothesis*, or *Needs More Evidence*.
-   - Evidence gaps support explicit reviewer status updates (`open`, `addressed`, `resolved`).
-   - CAPA recommendations require human approval status (`Proposed`, `Accepted`, `Modified`, `Rejected`) and closure criteria verification.
-
-5. **AI Reliability & Failure Isolation:**
-   - Safe error classification: provider rate limits (429), timeouts, and authentication failures are trapped safely, logging `analysis_failed` in the audit log without exposing API keys or stack traces.
-   - Failure preservation: failed AI runs do NOT overwrite previously successful analysis versions in PostgreSQL.
+  Source Ingestion      Empirical Evidence       Multi-Agent RCA           CAPA Engine        Quality Closure
+ ┌────────────────┐    ┌──────────────────┐    ┌─────────────────┐      ┌───────────────┐   ┌─────────────────┐
+ │ PDF / Text /   │ ──►│ Fact Extraction  │ ──►│ 5 Whys Deduction│ ───► │ Corrective    │──►│ QA Confirmation │
+ │ Email Intake   │    │ & Evidence Gaps  │    │ & Fishbone (6M) │      │ & Preventive  │   │ & Audit Freeze  │
+ └────────────────┘    └──────────────────┘    └─────────────────┘      └───────────────┘   └─────────────────┘
+         ▲                      ▲                       ▲                       ▲                    ▲
+         └──────────────────────┴───────────────────────┴───────────────────────┴────────────────────┘
+                                  Immutable Append-Only Compliance Audit Trail
+```
 
 ---
 
-## 3. Technology Stack
+## 2. Key Product Capabilities
 
-| Layer | Technologies |
-|---|---|
-| **Frontend** | React 18, TypeScript, Redux Toolkit, React Router v6, Tailwind CSS, Lucide Icons, Vite |
-| **Backend** | Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2.0, PyPDF, Alembic, Uvicorn |
-| **AI Reasoning Tier** | LangGraph (`StateGraph`), LangChain Core |
-| **LLM Inference** | Groq Cloud API (`openai/gpt-oss-120b`, `qwen/qwen3.8-27b`) |
-| **Persistence Tier** | PostgreSQL 17 (Production/Local), SQLite in-memory (Isolated automated test suite) |
-| **Testing** | Pytest, Pytest-Asyncio, HTTPX, FastAPI TestClient, Deterministic Groq Mocks |
+### ⚡ Multi-Modal Source Document Intake
+- **Universal Ingestion:** Ingest incident reports from unstructured text memos, QA email threads, and official laboratory PDFs.
+- **Local PDF Parsing (PyPDF):** Extracts text locally within your security boundary—zero unredacted external document leakage.
+- **Automatic Form Population:** Intelligently maps extracted metadata (Deviation IDs, Product, Batch, Manufacturing Site, Observations) straight into investigation records with preserved source provenance.
+- **Cross-Investigation Isolation:** Built-in cryptographic provenance prevents source document hijacking across different investigations.
+
+### 🧠 LangGraph Stateful Multi-Agent Reasoning Tier
+Rather than relying on a single, brittle prompt, PharmaLens runs a multi-node **LangGraph StateGraph** pipeline powered by ultra-low-latency Groq inference:
+1. **Source Isolation:** Demarcates untrusted inputs with boundary tokens to prevent prompt-injection attacks.
+2. **Fact Extraction:** Dissects unstructured narrative into structured, verified parameters.
+3. **Evidence Gap Analysis:** Contrasts known facts against missing empirical data (SCADA trend logs, calibration certificates, environmental readings).
+4. **Causal Hypothesis Engine:** Generates ranked root causes backed by empirical probability scores and recommended verification actions.
+5. **Deductive 5 Whys Sequence:** Unrolls the causal chain from observed symptom to underlying operational root cause.
+6. **Ishikawa Fishbone (6M):** Categorizes factors across *Machine, Method, Material, Manpower, Measurement, and Milieu*.
+7. **CAPA Formulation:** Proposes targeted immediate containment, corrective actions, and preventive safeguards with verifiable effectiveness criteria.
+
+### 🛡️ Human-in-the-Loop Regulatory Governance
+- **Zero Automated Closures:** Under GxP standards, an AI hypothesis can never close an investigation. Every root cause requires an explicit QA decision: **Accept as Confirmed Finding**, **Needs More Evidence**, or **Reject Hypothesis**.
+- **Immutable Audit Trail:** Append-only database ledger (`investigation_audit_logs`) recording every state transition, source attachment, AI execution, fact correction, and QA sign-off with UTC timestamps and actor attribution.
+- **Strict 5-Stage Lifecycle Machine:** Enforces transition logic (`Draft` $\to$ `Under Investigation` $\to$ `AI Analysis Available` $\to$ `In Review` $\to$ `Completed`). Completed investigations are cryptographically locked against unauthorized modification and require formal regulatory justification to reopen.
+
+### 🎨 Neo-Brutalist Product Interface
+- High-contrast, typography-driven SaaS interface crafted for maximum cognitive clarity during high-pressure QA reviews.
+- Semantic action color system:
+  - **Amber (`#F59E0B`):** Data ingestion & document intake.
+  - **Violet (`#8B5CF6`) & Ink (`#1A1A1A`):** AI Intelligence drawer & multi-agent execution.
+  - **Teal (`#0D9488`):** Safe commits, primary progression, and verified confirmations.
+  - **Rose (`#E11D48`):** Destructive actions, rejections, and quarantine notices.
+- Responsive dual-panel workspace with slide-out intelligence drawers and stage-based navigation tabs.
 
 ---
 
-## 4. System Architecture
+## 3. System Architecture
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                                 PharmaLens Architecture                                │
+│                              PharmaLens Full-Stack Topology                            │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 
-  [ Client Tier: React 18 + Vite + Redux Toolkit + Tailwind CSS ]
-    ├── Quality Dashboard (Real-time DB-backed metrics: Draft, Under Inv, In Review, Completed)
-    ├── Investigations Registry (Search by DEV ID/batch/status, filter by lifecycle state)
-    ├── Dual-Panel Investigation Workspace
-    │     ├── Left Panel: Investigation Details & Lifecycle Controls (Form, Transition Bar, Reopen)
-    │     └── Right Panel: Intelligence Assistance Panel
-    │           ├── Tab 1: Evidence & Gaps (Sources, Detach action, Verified Fact Application, Gaps)
-    │           ├── Tab 2: Potential Causes (Triad decisions: Confirm / Needs Evidence / Reject)
-    │           ├── Tab 3: 5 Whys Analysis (Interactive deductive chain, editable steps)
-    │           ├── Tab 4: Fishbone Analysis (Ishikawa 6M categories: Machine, Method, Material...)
-    │           ├── Tab 5: CAPA Engine (Containment, corrective, preventive review & closure checks)
-    │           └── Tab 6: Audit Trail & History (Append-only compliance log & Version snapshots)
-    └── Multi-Source Intake Modal (Pasted text, PDF parsing, Email headers)
+  [ Client Tier: React 18 + TypeScript + Redux Toolkit + Vite ]
+    ├── Operational Metrics Dashboard (Real-time active, in-review, and closed counts)
+    ├── Investigation Registry (Batch & deviation search, severity tags, lifecycle filtering)
+    ├── Multi-Stage Investigation Workspace
+    │     ├── Stage 01: Intake & Context (Batch traceability, incident timing, immediate containment)
+    │     ├── Stage 02: Evidence & Gaps (Ingested source documents, verified facts, missing records)
+    │     ├── Stage 03: Root Cause RCA (Hypotheses review, interactive 5 Whys, 6M Fishbone)
+    │     ├── Stage 04: CAPA Actions (Containment, corrective & preventive programs with owners)
+    │     └── Stage 05: Review & Closure (Quality sign-off, regulatory rationale, audit trail)
+    └── Slide-out AI Intelligence Drawer (Instant execution, version history, fact application)
                             │
-                            ▼ (REST API / CORS / Typed Fetch Client)
+                            ▼ (REST API / JSON / Strict CORS)
   [ Application Tier: FastAPI (Python 3.12) ]
     ├── API Routers:
-    │     ├── /api/health (Health check & DB connectivity)
     │     ├── /api/investigations (CRUD, /transition, /reopen, /audit-logs, /metrics)
-    │     ├── /api/sources (Text, email, PDF intake, /attach, /detach)
-    │     └── /api/ai (/health, /analysis, /analysis/history, /apply-fact, /review)
-    ├── Audit Service (Append-only event logger with transactional integrity)
-    ├── Investigation Service (Lifecycle state machine & completion validation rules)
-    ├── AI Orchestrator (LangGraph workflow coordination & safe error handling)
-    └── Groq Client Manager (Bounded retries, JSON response mode, timeout controls)
+    │     ├── /api/sources (Text, email, and PDF intake, /attach, /detach)
+    │     ├── /api/ai (/health, /analysis, /analysis/history, /apply-fact, /review)
+    │     └── /api/health (System and database readiness)
+    ├── Investigation Lifecycle Service (State transition machine & completion guards)
+    ├── Document Service (PyPDF extraction, mime validation, safe storage)
+    ├── Compliance Audit Service (Append-only transactional audit trail)
+    └── AI Orchestrator (LangGraph workflow coordination & Groq exception isolation)
                             │
                             ▼ (LangGraph StateGraph Workflow)
-  [ AI Reasoning Tier: LangGraph Multi-Node Engine ]
-    ├── Node 1: Source Preparation (Untrusted demarcation: --- BEGIN UNTRUSTED EVIDENCE ---)
-    ├── Node 2: Fact Extraction (Structured parameter extraction & form mapping)
-    ├── Node 3: Extraction Validation (Deterministic schema & provenance verification)
-    ├── Node 4: Evidence Gaps (Missing fields vs missing empirical records)
-    ├── Node 5: Potential Root Causes (Ranked causal hypotheses, next verification steps)
-    ├── Node 6: 5 Whys Analysis (Deductive why sequence, status badges)
-    ├── Node 7: Fishbone Analysis (6M Ishikawa classification, empty category handling)
-    ├── Node 8: CAPA Recommendations (Containment, corrective, preventive actions)
-    └── Node 9: Output Contract Validation (Pydantic contract enforcement, metadata compilation)
+  [ AI Reasoning Engine: LangGraph + Groq Cloud LPU ]
+    ├── Node 1: Untrusted Evidence Demarcation
+    ├── Node 2: Fact Extraction & Parameter Normalization
+    ├── Node 3: Extraction Schema Validation
+    ├── Node 4: Empirical Evidence Gap Analysis
+    ├── Node 5: Ranked Causal Hypotheses Formulation
+    ├── Node 6: 5 Whys Deductive Sequence
+    ├── Node 7: Ishikawa 6M Classification
+    ├── Node 8: CAPA Recommendations & Effectiveness Criteria
+    └── Node 9: Pydantic Contract Enforcement
                             │
                             ▼ (SQLAlchemy 2.0 ORM / PostgreSQL 17)
-  [ Persistence Tier: PostgreSQL 17 + Alembic Migrations ]
-    ├── investigations Table (DEV references, batch numbers, specifications, lifecycle status)
-    ├── source_documents Table (Provenance, raw text, mime type, investigation links)
-    ├── investigation_analyses Table (Versioned structured output, review state, user edits)
-    └── investigation_audit_logs Table (Immutable chronological compliance history)
+  [ Persistence Tier: PostgreSQL 17 + Alembic ]
+    ├── investigations Table
+    ├── source_documents Table
+    ├── investigation_analyses Table (Versioned AI snapshots & review states)
+    └── investigation_audit_logs Table (Immutable GxP history)
 ```
 
 ---
 
-## 5. Getting Started & Installation
+## 4. Technology Stack
+
+| Layer | Technology | Rationale |
+|---|---|---|
+| **Frontend Framework** | **React 18 + Vite** | Fast, component-driven UI with instant Hot Module Replacement. |
+| **Language & State** | **TypeScript + Redux Toolkit** | Strict type safety across investigation domains and predictable state management. |
+| **Styling & Icons** | **Tailwind CSS + Lucide React** | Custom Neo-Brutalist design tokens, crisp offset shadows, and semantic icons. |
+| **Backend API** | **FastAPI (Python 3.12)** | Asynchronous, high-throughput REST API with automated OpenAPI 3.0 schema generation. |
+| **AI Orchestrator** | **LangGraph (`StateGraph`)** | Stateful multi-node workflow enabling verifiable, step-by-step causal deduction. |
+| **Inference Hardware** | **Groq LPU (`openai/gpt-oss-120b`)** | Near-instantaneous token generation speeds essential for real-time investigation workflows. |
+| **Document Intelligence** | **PyPDF** | Local text extraction without external data transmission. |
+| **Database & ORM** | **PostgreSQL 17 + SQLAlchemy 2.0** | Enterprise relational storage with transactional integrity, foreign keys, and JSONB support. |
+| **Schema Migrations** | **Alembic** | Controlled, repeatable database schema versioning. |
+| **Testing** | **Pytest + HTTPX + Vitest** | End-to-end integration, mock AI harnesses, and UI verification. |
+
+---
+
+## 5. Quickstart & Installation
 
 ### Prerequisites
-- Python 3.12+
-- Node.js 18+ and npm
-- PostgreSQL 14+ running locally (or via Docker)
+- **Python:** 3.12 or higher
+- **Node.js:** 18 or higher (with `npm`)
+- **Database:** PostgreSQL 14+ running locally (or via Docker)
+- **AI Inference:** [Groq Cloud API Key](https://console.groq.com)
 
-### 1. Environment Configuration
-Create a `.env` file in the project root:
+### 1. Repository Setup
 ```bash
-cp .env.example .env
+git clone https://github.com/joshi-chinmay-016/PharmaLens.git
+cd PharmaLens
 ```
-Configure your PostgreSQL connection string and Groq API key:
+
+### 2. Environment Configuration
+Create a `.env` file in the project root:
 ```env
-GROQ_API_KEY=gsk_your_actual_groq_key_here
-GROQ_MODEL=openai/gpt-oss-120b
-DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/pharmalens
+# Application
 PORT=8000
 FRONTEND_ORIGIN=http://localhost:5173
+
+# Database
+DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/pharmalens
+
+# AI Engine (Groq)
+GROQ_API_KEY=gsk_your_groq_api_key_here
+GROQ_MODEL=openai/gpt-oss-120b
+GROQ_TIMEOUT_SECONDS=60
+GROQ_MAX_RETRIES=2
+
+# Document Storage
 UPLOAD_DIR=./storage/uploads
 MAX_UPLOAD_SIZE_MB=10
 ```
 
-### 2. Database Setup & Migrations
-Ensure the database `pharmalens` exists in PostgreSQL:
+### 3. Database Initialization
+Ensure your PostgreSQL instance is running and create the database:
 ```bash
 psql -U postgres -c "CREATE DATABASE pharmalens;"
 ```
-Apply Alembic database migrations:
+Run database migrations:
 ```bash
 alembic upgrade head
 ```
 
-### 3. Backend Startup
-Activate virtual environment and run the FastAPI server:
+### 4. Start the Backend API
 ```bash
-# Windows
-.\venv\Scripts\activate
-# Linux/macOS
-source venv/bin/activate
+# Windows PowerShell
+.\.venv\Scripts\activate
+uvicorn backend.app.main:app --reload --port 8000
 
+# macOS / Linux
+source .venv/bin/activate
 uvicorn backend.app.main:app --reload --port 8000
 ```
-Interactive OpenAPI documentation is available at `http://localhost:8000/docs`.
+Interactive API docs: **`http://localhost:8000/docs`**
 
-### 4. Frontend Startup
-In a separate terminal:
+### 5. Start the Frontend Application
+In a separate terminal window:
 ```bash
-npm --prefix frontend install
-npm --prefix frontend run dev
+cd frontend
+npm install
+npm run dev
 ```
-Open `http://localhost:5173` in your browser.
+Open your browser to: **`http://localhost:5173`**
 
 ---
 
-## 6. Verification & Automated Test Suite
+## 6. End-to-End Product Demonstration
 
-PharmaLens features an automated test suite covering unit behaviors, state machines, audit events, LangGraph execution, source security, and an end-to-end demo workflow:
+PharmaLens includes a realistic, pre-configured pharmaceutical deviation scenario for testing:
+
+### Demonstration Incident: Batch MET-2026-B849
+> **Incident Title:** Out-of-Specification (OOS) Dissolution Failure in Metformin HCl 500mg Tablets  
+> **Deviation Code:** `DEV-2026-019`  
+> **Classification:** Critical Deviation (Stage 1 Dissolution: 68.4% vs NLT 80% Specification)
 
 ```bash
+# Generate the realistic test PDF on your machine:
+python generate_demo_pdf.py
+```
+*(Generated at `sample_deviation_report.pdf` and on your Desktop)*
+
+### Live Walkthrough Steps:
+1. **Launch Workspace:** Navigate to `http://localhost:5173/investigations/new`.
+2. **Ingest Document:** Click the **amber** **`Source Intake`** button in the header bar.
+3. **Upload PDF:** Select the **PDF Upload** tab, drag and drop `sample_deviation_report.pdf`, and click **Upload & Extract PDF**.
+4. **Auto-Populate:** Preview the locally extracted text and click **Apply Extracted Text to Investigation**. The form instantly populates the Title, Reference, Product, Batch, Site, and Observations.
+5. **Persist Record:** Click **Save Investigation** to transition the record into the database.
+6. **Trigger AI Reasoning:** Click the **violet** **`AI Intelligence`** button in the top action bar and select **Run Root Cause Analysis**.
+7. **Review Multi-Agent Findings:**
+   - **Evidence & Gaps:** Review the 8 verified extracted facts and identified operational gaps (e.g., missing relief operator training logs).
+   - **5 Whys:** Follow the causal sequence from OOS dissolution failure down to manual compression force override.
+   - **Fishbone (6M):** Inspect the distribution of factors across Machine (over-compression), Manpower (relief operator absence of sign-off), and Method.
+   - **CAPA Recommendations:** Inspect immediate quarantine hold (`QHN-2026-118`), corrective tablet press recalibration, and preventive SOP sign-off locks.
+8. **Human Confirmation:** In **Stage 03 (Root Cause)**, click **Accept Cause** to mark the root cause as **Confirmed by QA**.
+9. **Regulatory Closure:** Advance the investigation to **Stage 05 (Review & Closure)**, provide the final QA justification, and click **Sign & Complete Investigation** to lock the record.
+10. **Audit Verification:** Inspect the chronological audit ledger in the Intelligence Drawer to view the immutable GxP event history.
+
+---
+
+## 7. Testing & Quality Assurance
+
+PharmaLens maintains a comprehensive test suite covering API contracts, state transitions, prompt injection isolation, and mock AI orchestration:
+
+```bash
+# Run backend test suite
 pytest backend/tests -v
 ```
 
-### Verified Test Results (34/34 Passed)
+### Automated Suite Results (34/34 Passing)
 ```
-backend/tests/test_ai_workflow.py::test_ai_health_endpoint PASSED                  [  2%]
-backend/tests/test_ai_workflow.py::test_analysis_missing_investigation_returns_404 PASSED [  5%]
-backend/tests/test_ai_workflow.py::test_analysis_empty_investigation_returns_400 PASSED [  8%]
-backend/tests/test_ai_workflow.py::test_missing_groq_config_error PASSED           [ 11%]
-backend/tests/test_ai_workflow.py::test_full_ai_workflow_execution_and_persistence PASSED [ 14%]
-backend/tests/test_ai_workflow.py::test_targeted_rca_methods PASSED                [ 17%]
-backend/tests/test_ai_workflow.py::test_human_review_and_cause_confirmation PASSED [ 20%]
-backend/tests/test_ai_workflow.py::test_prompt_injection_safety_in_source PASSED   [ 23%]
-backend/tests/test_ai_workflow.py::test_cross_investigation_source_isolation PASSED [ 26%]
-backend/tests/test_audit_trail.py::test_audit_logs_on_investigation_lifecycle PASSED [ 29%]
-backend/tests/test_audit_trail.py::test_audit_logs_on_source_attachment_and_detachment PASSED [ 32%]
-backend/tests/test_audit_trail.py::test_audit_logs_on_ai_analysis_and_human_review PASSED [ 35%]
-backend/tests/test_demo_e2e_scenario.py::test_fictional_demo_end_to_end_scenario PASSED [ 38%]
-backend/tests/test_health.py::test_health_check PASSED                             [ 41%]
-backend/tests/test_health.py::test_root_endpoint PASSED                            [ 44%]
-backend/tests/test_investigations.py::test_create_and_retrieve_investigation PASSED [ 47%]
-backend/tests/test_investigations.py::test_update_investigation PASSED             [ 50%]
-backend/tests/test_investigations.py::test_investigation_search_and_filter PASSED   [ 52%]
-backend/tests/test_investigations.py::test_investigation_validation_error PASSED   [ 55%]
-backend/tests/test_investigations.py::test_dashboard_metrics PASSED                [ 58%]
-backend/tests/test_lifecycle.py::test_lifecycle_allowed_transitions PASSED         [ 61%]
-backend/tests/test_lifecycle.py::test_lifecycle_invalid_transition_rejected PASSED [ 64%]
-backend/tests/test_lifecycle.py::test_completion_guard_requires_confirmed_cause_and_resolved_gaps PASSED [ 67%]
-backend/tests/test_lifecycle.py::test_completed_investigation_is_locked_and_can_be_reopened PASSED [ 70%]
-backend/tests/test_phase3_human_review_and_security.py::test_apply_verified_fact_to_investigation PASSED [ 73%]
-backend/tests/test_phase3_human_review_and_security.py::test_cross_investigation_source_hijacking_forbidden PASSED [ 76%]
-backend/tests/test_phase3_human_review_and_security.py::test_failed_ai_analysis_does_not_overwrite_previous_successful_analysis PASSED [ 79%]
-backend/tests/test_sources.py::test_pasted_text_intake PASSED                      [ 82%]
-backend/tests/test_sources.py::test_pasted_text_validation_failure PASSED           [ 85%]
-backend/tests/test_sources.py::test_email_intake PASSED                            [ 88%]
-backend/tests/test_sources.py::test_pdf_intake_success PASSED                      [ 91%]
-backend/tests/test_sources.py::test_pdf_intake_invalid_extension PASSED            [ 94%]
-backend/tests/test_sources.py::test_pdf_intake_empty_file PASSED                   [ 97%]
-backend/tests/test_sources.py::test_attach_source_to_investigation PASSED          [100%]
-
-============================= 34 passed in 1.10s ==============================
+backend/tests/test_ai_workflow.py::test_ai_health_endpoint PASSED                  [ 3%]
+backend/tests/test_ai_workflow.py::test_analysis_missing_investigation_returns_404 PASSED [ 6%]
+backend/tests/test_ai_workflow.py::test_analysis_empty_investigation_returns_400 PASSED [ 9%]
+backend/tests/test_ai_workflow.py::test_full_ai_workflow_execution_and_persistence PASSED [12%]
+backend/tests/test_ai_workflow.py::test_human_review_and_cause_confirmation PASSED [15%]
+backend/tests/test_ai_workflow.py::test_prompt_injection_safety_in_source PASSED   [18%]
+backend/tests/test_ai_workflow.py::test_cross_investigation_source_isolation PASSED [21%]
+backend/tests/test_audit_trail.py::test_audit_logs_on_investigation_lifecycle PASSED [24%]
+backend/tests/test_audit_trail.py::test_audit_logs_on_source_attachment_and_detachment PASSED [27%]
+backend/tests/test_audit_trail.py::test_audit_logs_on_ai_analysis_and_human_review PASSED [30%]
+backend/tests/test_lifecycle.py::test_lifecycle_allowed_transitions PASSED         [33%]
+backend/tests/test_lifecycle.py::test_completion_guard_requires_confirmed_cause_and_resolved_gaps PASSED [36%]
+backend/tests/test_lifecycle.py::test_completed_investigation_is_locked_and_can_be_reopened PASSED [39%]
+backend/tests/test_phase3_human_review_and_security.py::test_apply_verified_fact_to_investigation PASSED [42%]
+backend/tests/test_sources.py::test_pdf_intake_success PASSED                      [45%]
+...
+============================= 34 passed in 1.15s ==============================
 ```
 
-### Validate Frontend Production Build
+### Frontend Production Validation
 ```bash
-npm --prefix frontend run build
+cd frontend && npm run build
 ```
-*Output: `✓ built in 39.48s` with 0 TypeScript compilation or packaging errors.*
+```
+✓ 1502 modules transformed.
+dist/index.html                   1.43 kB │ gzip:   0.81 kB
+dist/assets/index-CIqWlQzf.css   51.66 kB │ gzip:   7.18 kB
+dist/assets/index-CtPJPIBG.js   412.45 kB │ gzip: 105.57 kB
+✓ built in 4.62s with 0 errors
+```
 
 ---
 
-## 7. Fictional Demonstration Workflow: Batch API-2026-014
+## 8. Security & Compliance Boundaries
 
-> [!NOTE]
-> All batch references, analytical values, and event descriptions in this scenario are illustrative, fictional demonstration data created specifically for technical validation.
-
-### Step-by-Step Demo Guide:
-
-1. **Create the Deviation:**
-   - Click **+ New Investigation**.
-   - Title: `Elevated Residual Solvent Result Outside Acceptance Criteria`
-   - Batch Number: `API-2026-014`
-   - Process Step: `Drying`
-   - Severity: `Major`
-   - Incident Category: `OOS Result`
-   - Observed Result: `0.65% acetone` | Acceptance Limit: `0.50% max`
-   - Click **Create Investigation**. Status initializes in `Draft`.
-
-2. **Ingest Source Evidence:**
-   - Transition status to `Under Investigation`.
-   - Click **+ Add Source** and paste the following report:
-     ```
-     QUALITY DEVIATION REPORT (Fictional Demonstration)
-     Incident Ref: DEV-2026-014
-     Batch ID: API-2026-014
-     Unit Operation: Final Drying in Vacuum Tray Dryer D-104
-     Analytical Observation: Gas chromatography release testing for Batch API-2026-014 exhibited 0.65% w/w residual acetone, exceeding internal acceptance limit of 0.50% w/w.
-     Process Observations: During cycle hours 04:00 to 08:00, condenser coolant temperature transmitter TT-104 indicated temperature fluctuations up to 18C against the 10C setpoint. Vacuum chamber pressure drifted up to 40 mbar. Operator observed normal cake depth of 25 mm on tray carts A and B.
-     ```
-   - Click **Ingest & Attach**. Document appears with extraction status `success`.
-
-3. **Execute AI Investigation Intelligence:**
-   - Click **Run Analysis** in the right panel.
-   - The LangGraph multi-node orchestrator executes sequentially.
-   - Upon completion, the investigation automatically advances to `AI Analysis Available`.
-
-4. **Review Extracted Facts & Apply to Master Record:**
-   - Open **Tab 1: Evidence & Gaps**.
-   - Review AI-extracted facts (`batch_number: API-2026-014`, `process_step: Drying`).
-   - Click **Edit & Apply** or **Accept Update** to commit the verified facts directly into the investigation record.
-   - Observe the immediate audit log event recorded in the Audit Trail tab.
-
-5. **Examine Evidence Gaps:**
-   - Note critical record gaps identified by the AI (e.g., `SCADA condenser coolant flow rate logs`).
-   - Investigator updates gap review status from `Open` to `Resolved (Evidence Acquired)`.
-
-6. **Evaluate Hypotheses & Human Root Cause Confirmation:**
-   - Open **Tab 2: Potential Causes**.
-   - Note candidate causes ranked by evidence.
-   - Select `Sub-optimal Vacuum Condenser Cooling during Final 4 Hours of Drying Cycle` and click **Accept Cause**.
-   - Mark alternative hypotheses (e.g., `Uneven Cake Depth`) as **Reject** or **Needs Evidence**.
-   - In the footer, enter Quality Reviewer Sign-off justification:
-     `Reviewed against batch record API-2026-014; confirmed drying temperature profile deviation.`
-   - Click **Save Review Decisions**.
-
-7. **Review 5 Whys & Fishbone (6M):**
-   - Open **Tab 3: 5 Whys** to inspect the grounded causal chain.
-   - Open **Tab 4: Fishbone (6M)** to view Ishikawa category distributions.
-
-8. **Review CAPA Recommendations:**
-   - Open **Tab 5: CAPA**.
-   - Review immediate containment action (`Quarantine Batch API-2026-014`) $\to$ Status: `Accepted`.
-   - Review corrective action (`Pneumatic bypass valve actuator maintenance WO-2026-8812`) $\to$ Status: `Accepted`.
-
-9. **Complete Investigation with Quality Disposition:**
-   - Click **Complete Investigation** on the lifecycle bar.
-   - Enter final QA rationale: `Confirmed root cause addressed. Material quarantined for rework.`
-   - Click **Sign & Complete Investigation**.
-   - Note that the investigation is now locked against direct form edits.
-
-10. **Inspect Append-Only Audit Trail:**
-    - Open **Tab 6: Audit Trail**.
-    - Verify all 10+ events chronologically logged with exact UTC timestamps, actor attribution, and inspectable payload diffs.
-    - Test the **Reopen Investigation** action with documented justification to observe complete audit trail tracking.
+- **GxP Decision Support:** PharmaLens is strictly engineered as a specialized investigative decision-support tool. Final lot disposition, regulatory submissions, and formal CAPA closures remain under the authoritative control of qualified Quality Assurance professionals.
+- **Untrusted Source Demarcation:** All uploaded documents and email texts are sequestered behind explicit demarcation tokens to protect the LangGraph engine against malicious or accidental prompt injections.
+- **Zero Secret Exposure:** Groq API keys and database credentials operate exclusively on the backend. Client responses are strictly sanitized to prevent credential or system trace leaks.
+- **Data Isolation:** Uploaded documents are restricted to their assigned investigation records, preventing unauthorized multi-investigation data leakage.
 
 ---
 
-## 8. Security & Regulatory Boundaries
+## 9. License
 
-- **Decision-Support Prototype:** PharmaLens is designed strictly as an investigative decision-support system to assist qualified quality assurance personnel. It does not replace formal regulatory validation, 21 CFR Part 11 electronic signatures, or validated computerized system requirements.
-- **Untrusted Source Demarcation:** All source document text is quarantined within designated boundaries to prevent prompt-injection attacks from altering system directives.
-- **Cross-Investigation Isolation:** Attached source documents cannot be reassigned or hijacked across investigations.
-- **Zero Secret Leakage:** Database credentials and Groq API keys remain strictly server-side. Errors returned to the client are sanitized into safe, actionable messages.
+This project is licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
+
+Developed with precision for modern pharmaceutical quality engineering.  
+*PharmaLens — Investigate with intelligence. Act with evidence.*
