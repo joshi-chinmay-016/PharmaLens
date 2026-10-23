@@ -158,98 +158,100 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 bg-ink/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+      <div className="card-brutal p-0 bg-white border-2 border-ink shadow-brutal-xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div className="px-6 py-4 bg-ink text-white flex items-center justify-between border-b-2 border-ink">
           <div>
-            <h3 className="text-base font-semibold">Incident Source Document Intake</h3>
-            <p className="text-xs text-slate-400">
+            <h3 className="font-display font-bold text-base uppercase tracking-wider text-white">
+              Incident Source Document Intake
+            </h3>
+            <p className="text-xs font-mono text-slate-300">
               Supply source material via pasted text, email details, or PDF report.
             </p>
           </div>
           <button
             onClick={handleClose}
-            className="text-slate-400 hover:text-white p-1 rounded-md transition-colors"
+            className="text-white hover:text-lime-accent p-1 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Selection */}
-        <div className="flex border-b border-slate-200 bg-slate-50 px-6 pt-3 gap-2">
+        <div className="flex border-b-2 border-ink bg-paper px-6 pt-3 gap-2">
           <button
             type="button"
             onClick={() => setActiveTab('text')}
-            className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-t-lg transition-colors border-t border-x ${
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-display font-bold uppercase tracking-wider border-2 border-b-0 border-ink transition-all ${
               activeTab === 'text'
-                ? 'bg-white text-slate-900 border-slate-200 -mb-[1px] shadow-sm'
-                : 'bg-transparent text-slate-500 border-transparent hover:text-slate-800'
+                ? 'bg-white text-ink -mb-[2px] shadow-brutal-xs'
+                : 'bg-paper text-muted hover:text-ink'
             }`}
           >
-            <FileText className="w-3.5 h-3.5 text-teal-600" />
-            Pasted Text
+            <FileText className="w-3.5 h-3.5 text-teal-deep" />
+            <span>Pasted Text</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('pdf')}
-            className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-t-lg transition-colors border-t border-x ${
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-display font-bold uppercase tracking-wider border-2 border-b-0 border-ink transition-all ${
               activeTab === 'pdf'
-                ? 'bg-white text-slate-900 border-slate-200 -mb-[1px] shadow-sm'
-                : 'bg-transparent text-slate-500 border-transparent hover:text-slate-800'
+                ? 'bg-white text-ink -mb-[2px] shadow-brutal-xs'
+                : 'bg-paper text-muted hover:text-ink'
             }`}
           >
-            <Upload className="w-3.5 h-3.5 text-blue-600" />
-            PDF Upload
+            <Upload className="w-3.5 h-3.5 text-blue-700" />
+            <span>PDF Upload</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('email')}
-            className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-t-lg transition-colors border-t border-x ${
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-display font-bold uppercase tracking-wider border-2 border-b-0 border-ink transition-all ${
               activeTab === 'email'
-                ? 'bg-white text-slate-900 border-slate-200 -mb-[1px] shadow-sm'
-                : 'bg-transparent text-slate-500 border-transparent hover:text-slate-800'
+                ? 'bg-white text-ink -mb-[2px] shadow-brutal-xs'
+                : 'bg-paper text-muted hover:text-ink'
             }`}
           >
-            <Mail className="w-3.5 h-3.5 text-indigo-600" />
-            Pasted Email
+            <Mail className="w-3.5 h-3.5 text-indigo-700" />
+            <span>Pasted Email</span>
           </button>
         </div>
 
         {/* Content Area */}
         <div className="p-6 overflow-y-auto flex-1 space-y-4">
           {error && (
-            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-lg flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
+            <div className="p-3 bg-rose-100 border-2 border-ink text-rose-900 text-xs shadow-brutal-xs flex items-start gap-2 font-mono font-bold">
+              <AlertTriangle className="w-4 h-4 text-rose-700 flex-shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {/* Result Preview if activeSource exists */}
           {activeSource ? (
-            <div className="border border-teal-200 bg-teal-50/50 rounded-lg p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-800">
-                  <CheckCircle2 className="w-4 h-4 text-teal-600" />
+            <div className="border-2 border-ink bg-paper p-5 shadow-brutal-sm space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-ink">
+                <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider text-teal-deep">
+                  <CheckCircle2 className="w-4 h-4 text-teal-primary" />
                   Source Intake Processed ({activeSource.source_type.replace('_', ' ')})
                 </span>
-                <span className="text-[11px] font-mono text-slate-500">
+                <span className="text-[11px] font-mono text-muted">
                   ID: {activeSource.source_id}
                 </span>
               </div>
 
               {activeSource.extraction_warning && (
-                <div className="p-2.5 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-md flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="p-2.5 bg-amber-100 border-2 border-ink text-amber-900 text-xs shadow-brutal-xs flex items-start gap-2 font-mono font-bold">
+                  <AlertTriangle className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
                   <span>{activeSource.extraction_warning}</span>
                 </div>
               )}
 
-              <div className="bg-white border border-slate-200 rounded p-3 max-h-48 overflow-y-auto">
-                <p className="text-[11px] font-mono font-medium text-slate-400 mb-1 uppercase tracking-wider">
+              <div className="bg-white border-2 border-ink p-3 max-h-48 overflow-y-auto shadow-brutal-xs">
+                <p className="text-[10px] font-mono font-bold text-muted mb-1 uppercase tracking-wider">
                   Extracted Content Preview ({activeSource.extracted_text?.length || 0} chars)
                 </p>
-                <pre className="text-xs text-slate-800 font-mono whitespace-pre-wrap leading-relaxed">
+                <pre className="text-xs text-ink font-mono whitespace-pre-wrap leading-relaxed">
                   {activeSource.extracted_text || 'No extractable text extracted from this document.'}
                 </pre>
               </div>
@@ -258,9 +260,9 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
                 <button
                   type="button"
                   onClick={handleApplyToForm}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-md shadow-sm transition-colors"
+                  className="btn-brutal-primary text-xs px-4 py-2"
                 >
-                  <span>Apply & Populate Form</span>
+                  <span>Apply &amp; Populate Form</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -271,13 +273,13 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
               {activeTab === 'text' && (
                 <form onSubmit={handleTextSubmit} className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-medium text-slate-700">
-                      Incident or Deviation Notes <span className="text-rose-500">*</span>
+                    <label className="text-xs font-mono font-bold uppercase tracking-wider text-ink">
+                      Incident or Deviation Notes <span className="text-rose-600">*</span>
                     </label>
                     <button
                       type="button"
                       onClick={loadFictionalSolventSample}
-                      className="text-[11px] text-teal-600 hover:text-teal-800 font-medium underline flex items-center gap-1"
+                      className="text-[11px] font-mono font-bold uppercase text-teal-deep hover:underline flex items-center gap-1"
                     >
                       <Copy className="w-3 h-3" />
                       Load Fictional DEV-2026-014 Scenario
@@ -289,7 +291,7 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
                       value={textTitleHint}
                       onChange={(e) => setTextTitleHint(e.target.value)}
                       placeholder="Optional reference / title hint (e.g., DEV-2026-014)"
-                      className="w-full text-xs px-3 py-2 border border-slate-300 rounded-md focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                      className="w-full text-xs font-mono px-3 py-2 border-2 border-ink bg-white shadow-brutal-xs focus:shadow-brutal focus:outline-none"
                     />
                   </div>
                   <div>
@@ -298,22 +300,22 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
                       value={pastedText}
                       onChange={(e) => setPastedText(e.target.value)}
                       placeholder="Paste incident description, deviation notes, or lab investigation findings here..."
-                      className="w-full text-xs px-3 py-2 border border-slate-300 rounded-md focus:ring-1 focus:ring-teal-500 focus:border-teal-500 font-mono leading-relaxed"
+                      className="w-full text-xs font-mono px-3 py-2 border-2 border-ink bg-white shadow-brutal-xs focus:shadow-brutal focus:outline-none leading-relaxed"
                       required
                       minLength={5}
                     />
                   </div>
                   <div className="flex items-center justify-between pt-2">
-                    <span className="text-[11px] text-slate-400">
-                      Minimum 5 characters. Retains source provenance.
+                    <span className="text-[10px] font-mono text-muted uppercase">
+                      Minimum 5 characters &bull; Retains document provenance
                     </span>
                     <button
                       type="submit"
                       disabled={loading || pastedText.trim().length < 5}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white text-xs font-semibold rounded-md shadow-sm transition-colors"
+                      className="btn-brutal-primary text-xs px-4 py-2"
                     >
                       {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                      <span>Process & Extract Text</span>
+                      <span>Process &amp; Extract Text</span>
                     </button>
                   </div>
                 </form>
@@ -326,15 +328,15 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
                     onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                     onDragLeave={() => setDragActive(false)}
                     onDrop={handleFileDrop}
-                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                      dragActive ? 'border-teal-500 bg-teal-50/30' : 'border-slate-300 bg-slate-50/50'
+                    className={`border-2 border-dashed p-6 text-center transition-all ${
+                      dragActive ? 'border-teal-primary bg-teal-light' : 'border-ink bg-paper shadow-brutal-xs'
                     }`}
                   >
-                    <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                    <p className="text-xs font-semibold text-slate-700">
+                    <Upload className="w-8 h-8 text-ink mx-auto mb-2" />
+                    <p className="text-xs font-display font-bold uppercase text-ink">
                       Drag and drop your incident PDF here, or browse
                     </p>
-                    <p className="text-[11px] text-slate-500 mt-1">
+                    <p className="text-[11px] font-mono text-muted mt-1">
                       Text-based PDF up to 10MB. Text extracted locally with PyPDF.
                     </p>
                     <input
@@ -350,25 +352,25 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
                     />
                     <label
                       htmlFor="pdf-upload-input"
-                      className="inline-block mt-3 px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-medium rounded cursor-pointer shadow-sm"
+                      className="btn-brutal-secondary text-xs px-3.5 py-1.5 mt-3 inline-block cursor-pointer shadow-brutal-xs"
                     >
                       Browse Files
                     </label>
                   </div>
 
                   {selectedFile && (
-                    <div className="flex items-center justify-between p-3 bg-slate-100 rounded-md border border-slate-200 text-xs">
+                    <div className="flex items-center justify-between p-3 bg-paper border-2 border-ink shadow-brutal-xs text-xs font-mono">
                       <div className="flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-rose-600" />
+                        <FileText className="w-4 h-4 text-teal-deep" />
                         <div>
-                          <p className="font-semibold text-slate-800">{selectedFile.name}</p>
-                          <p className="text-[10px] text-slate-500">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                          <p className="font-bold text-ink">{selectedFile.name}</p>
+                          <p className="text-[10px] text-muted">{(selectedFile.size / 1024).toFixed(1)} KB</p>
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={() => setSelectedFile(null)}
-                        className="text-slate-400 hover:text-slate-600 p-1"
+                        className="text-ink hover:text-rose-700 p-1"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -376,16 +378,16 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
                   )}
 
                   <div className="flex items-center justify-between pt-2">
-                    <span className="text-[11px] text-slate-400">
+                    <span className="text-[10px] font-mono text-muted uppercase">
                       Scanned PDFs will be detected and flagged.
                     </span>
                     <button
                       type="submit"
                       disabled={loading || !selectedFile}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white text-xs font-semibold rounded-md shadow-sm transition-colors"
+                      className="btn-brutal-primary text-xs px-4 py-2"
                     >
                       {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                      <span>Upload & Extract PDF</span>
+                      <span>Upload &amp; Extract PDF</span>
                     </button>
                   </div>
                 </form>
@@ -393,11 +395,11 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
 
               {/* Tab 3: Pasted Email */}
               {activeTab === 'email' && (
-                <form onSubmit={handleEmailSubmit} className="space-y-3">
+                <form onSubmit={handleEmailSubmit} className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-medium text-slate-700">
-                        Email Subject <span className="text-rose-500">*</span>
+                      <label className="text-xs font-mono font-bold uppercase tracking-wider text-ink block mb-1">
+                        Email Subject <span className="text-rose-600">*</span>
                       </label>
                       <input
                         type="text"
@@ -405,33 +407,33 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
                         value={emailSubject}
                         onChange={(e) => setEmailSubject(e.target.value)}
                         placeholder="e.g., URGENT: Deviation Notification DEV-2026-014"
-                        className="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-md focus:ring-1 focus:ring-teal-500"
+                        className="w-full text-xs font-sans px-3 py-2 border-2 border-ink bg-white shadow-brutal-xs focus:shadow-brutal focus:outline-none"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-slate-700">Sender</label>
+                      <label className="text-xs font-mono font-bold uppercase tracking-wider text-ink block mb-1">Sender</label>
                       <input
                         type="text"
                         value={emailSender}
                         onChange={(e) => setEmailSender(e.target.value)}
                         placeholder="e.g., QA Lead <qa@pharmamfg.com>"
-                        className="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-md focus:ring-1 focus:ring-teal-500"
+                        className="w-full text-xs font-sans px-3 py-2 border-2 border-ink bg-white shadow-brutal-xs focus:shadow-brutal focus:outline-none"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-slate-700">Received Date & Time</label>
+                    <label className="text-xs font-mono font-bold uppercase tracking-wider text-ink block mb-1">Received Date &amp; Time</label>
                     <input
                       type="text"
                       value={emailDate}
                       onChange={(e) => setEmailDate(e.target.value)}
                       placeholder="e.g., 2026-10-23 08:45 AM"
-                      className="w-full text-xs px-3 py-1.5 border border-slate-300 rounded-md focus:ring-1 focus:ring-teal-500"
+                      className="w-full text-xs font-mono px-3 py-2 border-2 border-ink bg-white shadow-brutal-xs focus:shadow-brutal focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-slate-700">
-                      Email Body <span className="text-rose-500">*</span>
+                    <label className="text-xs font-mono font-bold uppercase tracking-wider text-ink block mb-1">
+                      Email Body <span className="text-rose-600">*</span>
                     </label>
                     <textarea
                       rows={6}
@@ -440,17 +442,17 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
                       value={emailBody}
                       onChange={(e) => setEmailBody(e.target.value)}
                       placeholder="Paste the raw email notification or incident memo content..."
-                      className="w-full text-xs px-3 py-2 border border-slate-300 rounded-md focus:ring-1 focus:ring-teal-500 font-mono leading-relaxed"
+                      className="w-full text-xs font-mono px-3 py-2 border-2 border-ink bg-white shadow-brutal-xs focus:shadow-brutal focus:outline-none leading-relaxed"
                     />
                   </div>
                   <div className="flex items-center justify-between pt-2">
-                    <span className="text-[11px] text-slate-400">
+                    <span className="text-[10px] font-mono text-muted uppercase">
                       Treated as unverified source material.
                     </span>
                     <button
                       type="submit"
                       disabled={loading || !emailSubject.trim() || emailBody.trim().length < 5}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white text-xs font-semibold rounded-md shadow-sm transition-colors"
+                      className="btn-brutal-primary text-xs px-4 py-2"
                     >
                       {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                       <span>Save Email Source</span>

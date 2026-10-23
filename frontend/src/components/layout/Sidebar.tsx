@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import {
   LayoutDashboard,
   FileSpreadsheet,
@@ -9,11 +9,18 @@ import {
   Activity,
   Layers,
   Database,
-  ExternalLink,
+  Home,
+  CheckCircle2,
+  X,
 } from 'lucide-react';
 import { api } from '../../services/api';
 
-export const Sidebar: React.FC = () => {
+interface SidebarProps {
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMobile }) => {
   const [backendHealth, setBackendHealth] = useState<'healthy' | 'checking' | 'offline'>('checking');
 
   useEffect(() => {
@@ -29,47 +36,68 @@ export const Sidebar: React.FC = () => {
   }, []);
 
   const navItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Investigations', path: '/investigations', icon: FileSpreadsheet },
     { name: 'New Investigation', path: '/investigations/new', icon: PlusCircle },
     { name: 'Settings', path: '/settings', icon: Settings },
   ];
 
-  return (
-    <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col flex-shrink-0 border-r border-slate-800 min-h-screen">
+  const sidebarContent = (
+    <aside className="w-64 bg-ink text-white flex flex-col flex-shrink-0 border-r-2 border-ink h-full">
       {/* Brand Header */}
-      <div className="p-5 border-b border-slate-800">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-lg bg-teal-600 flex items-center justify-center text-white font-bold shadow-md shadow-teal-900/30">
-            <ShieldCheck className="w-5 h-5 text-teal-100" />
+      <div className="p-5 border-b-2 border-white/20 bg-ink flex items-center justify-between">
+        <Link to="/" onClick={onCloseMobile} className="flex items-center gap-3 group">
+          <div className="w-10 h-10 bg-teal border-2 border-white flex items-center justify-center text-white shadow-brutal-xs group-hover:scale-105 transition-all">
+            <ShieldCheck className="w-6 h-6 text-lime" />
           </div>
           <div>
-            <h1 className="text-lg font-bold tracking-tight text-white leading-tight">PharmaLens</h1>
-            <p className="text-[10px] uppercase tracking-wider text-teal-400 font-semibold">RCA & CAPA Platform</p>
+            <div className="flex items-center">
+              <span className="font-display font-extrabold text-xl tracking-tight text-white">Pharma</span>
+              <span className="font-display font-extrabold text-xl tracking-tight text-lime">Lens</span>
+            </div>
+            <p className="text-[10px] font-mono uppercase tracking-wider text-teal-light font-bold">RCA &amp; CAPA Platform</p>
           </div>
-        </div>
-        <div className="mt-3 text-xs text-slate-400 italic">
-          "See Beyond the Deviation."
-        </div>
+        </Link>
+        {onCloseMobile && (
+          <button
+            type="button"
+            onClick={onCloseMobile}
+            className="md:hidden text-gray-400 hover:text-white p-1"
+            aria-label="Close navigation"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
-        <div className="px-3 pb-1 text-[11px] font-semibold tracking-wider uppercase text-slate-400">
-          Core Workflow
+      <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
+        <div className="px-3 pb-1 text-[10px] font-mono font-bold tracking-widest uppercase text-slate-400">
+          Core Workflows
         </div>
+
+        {/* Landing Page Quick Link */}
+        <Link
+          to="/"
+          onClick={onCloseMobile}
+          className="flex items-center gap-3 px-3 py-2 text-xs font-mono font-semibold text-slate-300 hover:text-white hover:bg-white/10 border border-transparent transition-all"
+        >
+          <Home className="w-4 h-4 text-lime" />
+          <span>Product Overview</span>
+        </Link>
+
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
             <NavLink
               key={item.path}
               to={item.path}
-              end={item.path === '/'}
+              onClick={onCloseMobile}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all ${
+                `flex items-center gap-3 px-3 py-2.5 text-xs font-display font-bold uppercase tracking-wider transition-all border-2 ${
                   isActive
-                    ? 'bg-teal-700/30 text-teal-300 border-l-4 border-teal-500 pl-2'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                    ? 'bg-teal text-white border-white shadow-brutal-xs translate-x-1'
+                    : 'text-slate-300 hover:text-white hover:bg-white/10 border-transparent'
                 }`
               }
             >
@@ -79,66 +107,89 @@ export const Sidebar: React.FC = () => {
           );
         })}
 
-        <div className="pt-6 px-3 pb-1 text-[11px] font-semibold tracking-wider uppercase text-slate-400">
-          Architecture Modules
+        <div className="pt-6 px-3 pb-1 text-[10px] font-mono font-bold tracking-widest uppercase text-slate-400">
+          Active Modules
         </div>
-        <div className="space-y-1 text-xs text-slate-400 px-3">
-          <div className="flex items-center justify-between py-1.5 border-b border-slate-800/60">
+        <div className="space-y-1 text-xs text-slate-300 px-3 font-mono">
+          <div className="flex items-center justify-between py-1.5 border-b border-white/10 text-[11px]">
             <span className="flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-slate-400" />
+              <Layers className="w-3.5 h-3.5 text-lime" />
               Source Intake
             </span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-teal-950 text-teal-300 border border-teal-800">
-              Active (Phase 1)
+            <span className="text-[9px] px-1.5 py-0.2 bg-teal text-white border border-white font-bold">
+              Active
             </span>
           </div>
-          <div className="flex items-center justify-between py-1.5 border-b border-slate-800/60">
+          <div className="flex items-center justify-between py-1.5 border-b border-white/10 text-[11px]">
             <span className="flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5 text-slate-400" />
-              Evidence RCA
+              <Activity className="w-3.5 h-3.5 text-lime" />
+              LangGraph RCA
             </span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
-              Phase 2
+            <span className="text-[9px] px-1.5 py-0.2 bg-teal text-white border border-white font-bold">
+              Active
             </span>
           </div>
-          <div className="flex items-center justify-between py-1.5">
+          <div className="flex items-center justify-between py-1.5 text-[11px]">
             <span className="flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+              <ShieldCheck className="w-3.5 h-3.5 text-lime" />
               Intelligent CAPA
             </span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
-              Phase 2
+            <span className="text-[9px] px-1.5 py-0.2 bg-teal text-white border border-white font-bold">
+              Active
             </span>
           </div>
         </div>
       </nav>
 
       {/* System Status Footer */}
-      <div className="p-4 bg-slate-950/60 border-t border-slate-800 text-xs">
+      <div className="p-4 bg-black/40 border-t-2 border-white/20 text-xs">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-slate-400 font-medium flex items-center gap-1.5">
-            <Database className="w-3.5 h-3.5 text-slate-400" />
-            Backend & DB
+          <span className="text-slate-300 font-mono text-[11px] font-bold flex items-center gap-1.5">
+            <Database className="w-3.5 h-3.5 text-lime" />
+            Backend &amp; DB
           </span>
           <span className="flex items-center gap-1.5">
             <span
-              className={`w-2 h-2 rounded-full ${
+              className={`w-2 h-2 inline-block ${
                 backendHealth === 'healthy'
-                  ? 'bg-teal-400 shadow-sm shadow-teal-400'
+                  ? 'bg-lime'
                   : backendHealth === 'checking'
                   ? 'bg-amber-400 animate-pulse'
                   : 'bg-rose-500'
               }`}
             />
-            <span className="text-[11px] text-slate-300 font-mono">
+            <span className="text-[10px] text-white font-mono font-bold uppercase">
               {backendHealth === 'healthy' ? 'PostgreSQL' : backendHealth === 'checking' ? 'Connecting' : 'Offline'}
             </span>
           </span>
         </div>
-        <p className="text-[11px] text-slate-400 leading-snug">
+        <p className="text-[10px] text-slate-400 font-mono leading-snug">
           Investigate with intelligence. Act with evidence.
         </p>
       </div>
     </aside>
+  );
+
+  return (
+    <>
+      {/* Desktop Persistent Sidebar */}
+      <div className="hidden md:flex flex-col flex-shrink-0 h-full">
+        {sidebarContent}
+      </div>
+
+      {/* Mobile Drawer Overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          <div
+            className="fixed inset-0 bg-ink/70 backdrop-blur-xs"
+            onClick={onCloseMobile}
+            aria-hidden="true"
+          />
+          <div className="relative z-50 h-full shadow-brutal-xl">
+            {sidebarContent}
+          </div>
+        </div>
+      )}
+    </>
   );
 };

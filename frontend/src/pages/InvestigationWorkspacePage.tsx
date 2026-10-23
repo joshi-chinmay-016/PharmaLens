@@ -142,7 +142,7 @@ export const InvestigationWorkspacePage: React.FC = () => {
         <button
           type="button"
           onClick={() => navigate('/investigations')}
-          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 font-medium transition-colors"
+          className="btn-brutal-secondary text-xs px-3 py-1.5 shadow-brutal-xs inline-flex items-center gap-1.5"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Registry</span>
@@ -153,9 +153,9 @@ export const InvestigationWorkspacePage: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/investigations/new')}
-              className="inline-flex items-center gap-1.5 text-xs text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 px-3 py-1.5 rounded-md font-medium transition-colors"
+              className="btn-brutal-secondary text-xs px-3 py-1.5 shadow-brutal-xs inline-flex items-center gap-1.5"
             >
-              <PlusCircle className="w-3.5 h-3.5" />
+              <PlusCircle className="w-3.5 h-3.5 text-teal-deep" />
               <span>Create Another Record</span>
             </button>
           </div>
@@ -164,11 +164,11 @@ export const InvestigationWorkspacePage: React.FC = () => {
 
       {/* Lifecycle Workflow Progression Bar (only in edit mode with loaded record) */}
       {isEditMode && currentInvestigation && (
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+        <div className="card-brutal p-5 bg-white border-2 border-ink shadow-brutal space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b-2 border-ink">
             <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                Lifecycle State:
+              <span className="font-mono text-xs font-bold text-ink uppercase tracking-wider">
+                Workflow State:
               </span>
               <StatusBadge status={currentInvestigation.status} size="md" />
             </div>
@@ -179,7 +179,7 @@ export const InvestigationWorkspacePage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleTransition('Under Investigation', 'Investigation intake initiated')}
-                  className="inline-flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-3 py-1.5 rounded-md font-semibold transition-colors"
+                  className="btn-brutal-secondary text-xs px-3 py-1.5 shadow-brutal-xs inline-flex items-center gap-1.5 text-amber-800"
                 >
                   <Clock className="w-3.5 h-3.5" />
                   Mark Under Investigation
@@ -190,7 +190,7 @@ export const InvestigationWorkspacePage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleTransition('In Review', 'Submitted for quality review')}
-                  className="inline-flex items-center gap-1.5 text-xs text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-md font-semibold transition-colors"
+                  className="btn-brutal-secondary text-xs px-3 py-1.5 shadow-brutal-xs inline-flex items-center gap-1.5 text-blue-800"
                 >
                   <Clock className="w-3.5 h-3.5" />
                   Move to In Review
@@ -201,7 +201,7 @@ export const InvestigationWorkspacePage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleTransition('In Review', 'Reviewer commenced findings review')}
-                  className="inline-flex items-center gap-1.5 text-xs text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-md font-semibold transition-colors"
+                  className="btn-brutal-lime text-xs px-3.5 py-1.5 shadow-brutal-xs inline-flex items-center gap-1.5"
                 >
                   <FileCheck2 className="w-3.5 h-3.5" />
                   Start Human Review
@@ -212,10 +212,10 @@ export const InvestigationWorkspacePage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsCompleteModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 text-xs text-white bg-emerald-600 hover:bg-emerald-700 px-3.5 py-1.5 rounded-md font-semibold shadow-sm transition-colors"
+                  className="btn-brutal-primary text-xs px-4 py-2 shadow-brutal inline-flex items-center gap-1.5"
                 >
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  Sign Off & Complete Investigation
+                  <ShieldCheck className="w-4 h-4 text-lime-accent" />
+                  <span>Sign Off &amp; Complete Investigation</span>
                 </button>
               )}
 
@@ -223,7 +223,7 @@ export const InvestigationWorkspacePage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsReopenModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 text-xs text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-3 py-1.5 rounded-md font-semibold transition-colors shadow-sm"
+                  className="btn-brutal-secondary text-xs px-3 py-1.5 shadow-brutal-xs inline-flex items-center gap-1.5 text-amber-900 border-2 border-amber-800"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   Reopen Investigation
@@ -244,24 +244,24 @@ export const InvestigationWorkspacePage: React.FC = () => {
               return (
                 <div
                   key={stage.key}
-                  className={`flex items-center gap-2 p-2 rounded-lg border text-xs font-medium transition-colors ${
+                  className={`flex items-center gap-2 p-2.5 border-2 border-ink shadow-brutal-xs text-xs font-mono font-bold uppercase transition-all ${
                     isCurrent
-                      ? 'bg-teal-50 border-teal-300 text-teal-900 font-bold'
+                      ? 'bg-lime-accent text-ink -translate-y-0.5'
                       : isPast
-                      ? 'bg-slate-50 border-slate-200 text-slate-700'
-                      : 'bg-white border-slate-100 text-slate-400'
+                      ? 'bg-teal-primary text-white'
+                      : 'bg-paper text-muted'
                   }`}
                 >
                   <div
-                    className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
+                    className={`w-5 h-5 border border-ink flex items-center justify-center text-[10px] font-bold ${
                       isCurrent
-                        ? 'bg-teal-600 text-white'
+                        ? 'bg-ink text-lime-accent'
                         : isPast
-                        ? 'bg-emerald-500 text-white'
-                        : 'bg-slate-200 text-slate-500'
+                        ? 'bg-white text-ink'
+                        : 'bg-white text-muted'
                     }`}
                   >
-                    {isPast ? <Check className="w-2.5 h-2.5 stroke-[3]" /> : idx + 1}
+                    {isPast ? <Check className="w-3 h-3 stroke-[3]" /> : idx + 1}
                   </div>
                   <span className="truncate">{stage.key}</span>
                 </div>
@@ -270,17 +270,17 @@ export const InvestigationWorkspacePage: React.FC = () => {
           </div>
 
           {lifecycleError && (
-            <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-800 text-xs flex items-center justify-between">
+            <div className="p-3 bg-rose-50 border-2 border-ink shadow-brutal-xs text-rose-900 text-xs font-mono font-bold flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                <AlertCircle className="w-4 h-4 text-rose-700 flex-shrink-0" />
                 <span>{lifecycleError}</span>
               </div>
               <button
                 type="button"
                 onClick={() => setLifecycleError(null)}
-                className="text-rose-500 hover:text-rose-700"
+                className="text-rose-700 hover:text-rose-900"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           )}
@@ -290,14 +290,14 @@ export const InvestigationWorkspacePage: React.FC = () => {
       {loading && isEditMode && !currentInvestigation ? (
         <LoadingSpinner message="Retrieving investigation record..." />
       ) : error && isEditMode && !currentInvestigation ? (
-        <div className="p-8 bg-white border border-rose-200 rounded-xl text-center space-y-3">
-          <AlertCircle className="w-8 h-8 text-rose-500 mx-auto" />
-          <h3 className="text-sm font-bold text-slate-900">Failed to Load Investigation</h3>
-          <p className="text-xs text-slate-500">{error}</p>
+        <div className="p-8 card-brutal bg-white text-center space-y-4">
+          <AlertCircle className="w-10 h-10 text-rose-600 mx-auto" />
+          <h3 className="font-display font-bold text-base text-ink">Failed to Load Investigation</h3>
+          <p className="text-xs text-muted font-mono">{error}</p>
           <button
             type="button"
             onClick={() => id && dispatch(fetchInvestigationById(id))}
-            className="text-xs px-4 py-2 bg-slate-900 text-white rounded-md font-medium"
+            className="btn-brutal-primary text-xs px-4 py-2"
           >
             Retry Loading
           </button>
@@ -338,27 +338,29 @@ export const InvestigationWorkspacePage: React.FC = () => {
 
       {/* Complete Investigation Confirmation Modal */}
       {isCompleteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-lg w-full p-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700">
-                <ShieldCheck className="w-5 h-5" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/70 backdrop-blur-xs p-4">
+          <div className="card-brutal p-6 bg-white border-2 border-ink shadow-brutal-xl max-w-lg w-full space-y-4">
+            <div className="flex items-center gap-3 border-b-2 border-ink pb-3">
+              <div className="w-10 h-10 border-2 border-ink bg-emerald-100 flex items-center justify-center text-emerald-800 shadow-brutal-xs">
+                <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-900">Complete & Seal Investigation</h3>
-                <p className="text-xs text-slate-500">
-                  {currentInvestigation?.investigation_id} — Formal Quality Sign-off
+                <h3 className="font-display font-bold text-base text-ink uppercase tracking-wider">
+                  Complete &amp; Seal Investigation
+                </h3>
+                <p className="text-xs font-mono text-muted">
+                  {currentInvestigation?.investigation_id} &bull; Formal Quality Sign-Off
                 </p>
               </div>
             </div>
 
-            <div className="space-y-3 text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <div className="space-y-3 text-xs text-slate-800 bg-paper p-3 border-2 border-ink shadow-brutal-xs">
               <p>
-                <strong>Regulatory & Quality Safeguard:</strong> Completing this investigation seals the record from direct edits. Ensure root causes have been human-confirmed and critical gaps are resolved.
+                <strong>Regulatory &amp; Quality Safeguard:</strong> Completing this investigation seals the record from direct edits. Ensure root causes have been human-confirmed and critical gaps are resolved.
               </p>
               {currentInvestigation?.has_unresolved_gaps && (
-                <div className="p-2 bg-amber-50 border border-amber-200 rounded text-amber-800 flex items-start gap-1.5">
-                  <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="p-2 bg-amber-100 border border-ink text-amber-900 flex items-start gap-1.5 font-mono text-[11px]">
+                  <AlertCircle className="w-4 h-4 text-amber-800 flex-shrink-0 mt-0.5" />
                   <span>
                     Warning: Investigation has unresolved gaps flagged. Please provide QA disposition justification below to complete.
                   </span>
@@ -367,7 +369,7 @@ export const InvestigationWorkspacePage: React.FC = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">
+              <label className="text-xs font-mono font-bold uppercase tracking-wider text-ink block">
                 Quality Reviewer Sign-off Rationale / Disposition Notes:
               </label>
               <textarea
@@ -375,24 +377,24 @@ export const InvestigationWorkspacePage: React.FC = () => {
                 onChange={(e) => setCompletionJustification(e.target.value)}
                 placeholder="Document QA evaluation, root cause verification evidence, and disposition approval..."
                 rows={3}
-                className="w-full text-xs p-2.5 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full text-xs p-2.5 border-2 border-ink bg-white font-sans text-ink shadow-brutal-xs focus:shadow-brutal focus:outline-none"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t-2 border-ink">
               <button
                 type="button"
                 onClick={() => setIsCompleteModalOpen(false)}
-                className="text-xs px-3 py-1.5 text-slate-600 hover:text-slate-800 font-medium"
+                className="btn-brutal-secondary text-xs px-3.5 py-2"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={() => handleTransition('Completed', completionJustification)}
-                className="text-xs text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-1.5 rounded-md font-semibold shadow-sm transition-colors"
+                className="btn-brutal-primary text-xs px-4 py-2"
               >
-                Confirm Sign-off & Seal
+                Confirm Sign-off &amp; Seal
               </button>
             </div>
           </div>
@@ -401,45 +403,47 @@ export const InvestigationWorkspacePage: React.FC = () => {
 
       {/* Reopen Investigation Modal */}
       {isReopenModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-lg w-full p-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-700">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/70 backdrop-blur-xs p-4">
+          <div className="card-brutal p-6 bg-white border-2 border-ink shadow-brutal-xl max-w-lg w-full space-y-4">
+            <div className="flex items-center gap-3 border-b-2 border-ink pb-3">
+              <div className="w-10 h-10 border-2 border-ink bg-amber-100 flex items-center justify-center text-amber-800 shadow-brutal-xs">
                 <RotateCcw className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-900">Reopen Investigation</h3>
-                <p className="text-xs text-slate-500">
-                  {currentInvestigation?.investigation_id} — GxP Reopening Workflow
+                <h3 className="font-display font-bold text-base text-ink uppercase tracking-wider">
+                  Reopen Investigation
+                </h3>
+                <p className="text-xs font-mono text-muted">
+                  {currentInvestigation?.investigation_id} &bull; GxP Reopening Workflow
                 </p>
               </div>
             </div>
 
-            <p className="text-xs text-slate-600">
+            <p className="text-xs text-slate-700 leading-relaxed">
               Reopening a completed pharmaceutical investigation generates an auditable record in compliance history. Please state the specific regulatory or analytical justification (minimum 5 characters).
             </p>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">
+              <label className="text-xs font-mono font-bold uppercase tracking-wider text-ink block">
                 Mandatory Reopening Justification:
               </label>
               <textarea
                 value={reopenReason}
                 onChange={(e) => setReopenReason(e.target.value)}
-                placeholder="e.g., New chromatography data received, CAPA effectiveness check failure, or QA audit observation..."
+                placeholder="e.g., New analytical data received, CAPA effectiveness check failure, or QA audit observation..."
                 rows={3}
-                className="w-full text-xs p-2.5 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full text-xs p-2.5 border-2 border-ink bg-white font-sans text-ink shadow-brutal-xs focus:shadow-brutal focus:outline-none"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">
+              <label className="text-xs font-mono font-bold uppercase tracking-wider text-ink block">
                 Target Transition State:
               </label>
               <select
                 value={reopenTargetStatus}
                 onChange={(e) => setReopenTargetStatus(e.target.value)}
-                className="w-full text-xs p-2 rounded-md border border-slate-300 bg-white"
+                className="w-full text-xs p-2.5 border-2 border-ink bg-white font-mono font-bold uppercase shadow-brutal-xs focus:shadow-brutal focus:outline-none cursor-pointer"
               >
                 <option value="In Review">In Review (QA Reviewing New Data)</option>
                 <option value="Under Investigation">Under Investigation (Collecting Further Evidence)</option>
@@ -447,18 +451,18 @@ export const InvestigationWorkspacePage: React.FC = () => {
               </select>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t-2 border-ink">
               <button
                 type="button"
                 onClick={() => setIsReopenModalOpen(false)}
-                className="text-xs px-3 py-1.5 text-slate-600 hover:text-slate-800 font-medium"
+                className="btn-brutal-secondary text-xs px-3.5 py-2"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleReopen}
-                className="text-xs text-white bg-amber-700 hover:bg-amber-800 px-4 py-1.5 rounded-md font-semibold shadow-sm transition-colors"
+                className="btn-brutal-primary text-xs px-4 py-2"
               >
                 Confirm Reopening
               </button>

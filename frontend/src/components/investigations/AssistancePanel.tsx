@@ -30,6 +30,7 @@ import {
   FileCheck,
   Lock,
   ShieldAlert,
+  ArrowRight,
 } from 'lucide-react';
 import {
   Investigation,
@@ -240,37 +241,39 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
   const isConfirmed = currentAnalysis?.is_confirmed_by_human;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
+    <div className="bg-white border-2 border-ink shadow-brutal flex flex-col h-full overflow-hidden">
       {/* Panel Header */}
-      <div className="p-4 bg-slate-900 text-white border-b border-slate-800">
+      <div className="p-4 bg-ink text-white border-b-2 border-ink">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-teal border-2 border-white flex items-center justify-center text-lime shadow-[2px_2px_0px_#000]">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                Investigation Intelligence
+              <div className="flex items-center gap-2">
+                <h3 className="font-display text-sm font-bold tracking-wide uppercase text-white">
+                  Investigation Intelligence
+                </h3>
                 {currentAnalysis && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-teal-900 text-teal-300 border border-teal-700 font-mono font-semibold">
+                  <span className="text-[10px] px-2 py-0.5 bg-lime text-ink font-mono font-bold border border-white">
                     v{currentAnalysis.version}
                   </span>
                 )}
-              </h3>
-              <p className="text-[11px] text-slate-400">
-                LangGraph RCA Orchestrator • {currentAnalysis?.model_identifier || 'Groq Engine'}
+              </div>
+              <p className="font-mono text-[11px] text-gray-300">
+                LangGraph Multi-Node Orchestrator • {currentAnalysis?.model_identifier || 'Groq Llama-3.3-70b'}
               </p>
             </div>
           </div>
 
           {/* Run Analysis Action Button with Dropdown */}
           <div className="relative">
-            <div className="inline-flex rounded-md shadow-xs">
+            <div className="inline-flex shadow-[3px_3px_0px_#000]">
               <button
                 type="button"
                 onClick={handleRunFullAnalysis}
                 disabled={loading || !hasTextContent}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-500 disabled:bg-slate-700 text-white text-xs font-semibold rounded-l-md transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-lime hover:bg-white text-ink text-xs font-mono font-bold uppercase border-2 border-ink transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 title={!hasTextContent ? 'Provide incident description or attach sources first' : 'Run full AI analysis'}
               >
                 {loading ? (
@@ -284,7 +287,8 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                 type="button"
                 onClick={() => setShowRunOptions(!showRunOptions)}
                 disabled={loading || !hasTextContent}
-                className="px-1.5 bg-teal-700 hover:bg-teal-600 disabled:bg-slate-700 text-white rounded-r-md border-l border-teal-800 transition-colors"
+                className="px-2 bg-ink hover:bg-teal text-white border-2 border-l-0 border-ink transition-colors disabled:opacity-50"
+                aria-label="Analysis options"
               >
                 <ChevronDown className="w-3.5 h-3.5" />
               </button>
@@ -292,41 +296,41 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
 
             {/* Run Options Dropdown Menu */}
             {showRunOptions && (
-              <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-lg shadow-lg z-30 py-1 text-xs text-slate-800">
-                <div className="px-3 py-1.5 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-100">
-                  Execution Scope
+              <div className="absolute right-0 mt-2 w-72 bg-paper border-2 border-ink shadow-brutal z-30 py-1 text-xs text-ink font-mono">
+                <div className="px-3 py-1.5 text-[10px] uppercase font-bold text-muted border-b border-subtle">
+                  Targeted Execution Scope
                 </div>
                 <button
                   type="button"
                   onClick={handleRunFullAnalysis}
-                  className="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center justify-between"
+                  className="w-full text-left px-3 py-2.5 hover:bg-lime/30 flex items-center justify-between border-b border-subtle/50"
                 >
-                  <span className="font-medium text-teal-800">Full Intelligence (All Nodes)</span>
-                  <Sparkles className="w-3.5 h-3.5 text-teal-600" />
+                  <span className="font-bold text-teal">Full Intelligence (All 4 Nodes)</span>
+                  <Sparkles className="w-3.5 h-3.5 text-teal" />
                 </button>
                 <button
                   type="button"
                   onClick={() => handleRunTargeted('fiveWhys')}
-                  className="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center justify-between"
+                  className="w-full text-left px-3 py-2 hover:bg-white flex items-center justify-between"
                 >
                   <span>5 Whys Chain Only</span>
-                  <GitBranch className="w-3.5 h-3.5 text-slate-400" />
+                  <GitBranch className="w-3.5 h-3.5 text-muted" />
                 </button>
                 <button
                   type="button"
                   onClick={() => handleRunTargeted('fishbone')}
-                  className="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center justify-between"
+                  className="w-full text-left px-3 py-2 hover:bg-white flex items-center justify-between"
                 >
-                  <span>Fishbone (6M) Only</span>
-                  <Network className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Fishbone (6M Matrix) Only</span>
+                  <Network className="w-3.5 h-3.5 text-muted" />
                 </button>
                 <button
                   type="button"
                   onClick={() => handleRunTargeted('capa')}
-                  className="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center justify-between"
+                  className="w-full text-left px-3 py-2 hover:bg-white flex items-center justify-between"
                 >
                   <span>CAPA Recommendations Only</span>
-                  <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-muted" />
                 </button>
               </div>
             )}
@@ -335,18 +339,19 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
       </div>
 
       {/* Mandatory Quality & Regulatory Disclaimer Banner */}
-      <div className="p-2.5 bg-amber-50/90 border-b border-amber-200 flex items-start gap-2 text-xs text-amber-900">
-        <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+      <div className="p-3 bg-[#FEF3C7] border-b-2 border-ink flex items-start gap-2.5 text-xs text-ink font-mono">
+        <AlertTriangle className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
         <div className="leading-snug text-[11px]">
-          <strong>Pharmaceutical Quality Safeguard:</strong> All AI-generated causes, 5 Whys steps, and CAPA actions are unconfirmed evidentiary hypotheses. Formal confirmation strictly requires qualified human quality investigator review.
+          <strong className="font-bold uppercase tracking-wider text-amber-900 mr-1">[SAFEGUARD]</strong>
+          All AI-generated causes, 5 Whys steps, and CAPA actions are unconfirmed hypotheses. Confirmation strictly requires qualified human quality investigator review.
         </div>
       </div>
 
       {/* Loading Stage Indicator */}
       {loading && (
-        <div className="p-3 bg-teal-50 border-b border-teal-200 flex items-center gap-3 text-xs text-teal-900">
-          <RotateCw className="w-4 h-4 text-teal-600 animate-spin flex-shrink-0" />
-          <div className="flex-1 font-medium">
+        <div className="p-3 bg-[#CCFBF1] border-b-2 border-ink flex items-center gap-3 text-xs font-mono text-ink">
+          <RotateCw className="w-4 h-4 text-teal animate-spin flex-shrink-0" />
+          <div className="flex-1 font-bold">
             {stageMessage || 'Executing LangGraph multi-node analysis workflow...'}
           </div>
         </div>
@@ -354,42 +359,42 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
 
       {/* Error Banner */}
       {error && (
-        <div className="p-3 bg-rose-50 border-b border-rose-200 flex items-start gap-2 text-xs text-rose-900">
-          <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
+        <div className="p-3 bg-[#FEE2E2] border-b-2 border-ink flex items-start gap-2 text-xs font-mono text-ink font-semibold">
+          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <strong>Analysis Warning / Error:</strong> {error}
+            <strong className="uppercase">Analysis Error:</strong> {error}
           </div>
         </div>
       )}
 
       {/* Save Success Banner */}
       {saveSuccess && (
-        <div className="p-3 bg-emerald-50 border-b border-emerald-200 flex items-center justify-between text-xs text-emerald-900">
+        <div className="p-3 bg-lime border-b-2 border-ink flex items-center justify-between text-xs font-mono text-ink font-bold">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <CheckCircle2 className="w-4 h-4 text-ink" />
             <span>{saveSuccess}</span>
           </div>
           <button
             type="button"
             onClick={() => dispatch(clearSaveStatus())}
-            className="text-emerald-700 hover:text-emerald-900"
+            className="text-ink hover:opacity-75 p-0.5"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {/* Human Confirmed Root Cause Banner */}
       {isConfirmed && currentAnalysis?.confirmed_root_cause && (
-        <div className="p-3 bg-emerald-50 border-b border-emerald-200 flex items-start gap-2.5 text-xs text-emerald-950">
-          <Award className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-          <div>
+        <div className="p-3.5 bg-teal text-white border-b-2 border-ink flex items-start gap-3">
+          <Award className="w-5 h-5 text-lime flex-shrink-0 mt-0.5" />
+          <div className="space-y-0.5">
             <div className="flex items-center gap-2">
-              <span className="font-bold uppercase tracking-wider text-[10px] px-1.5 py-0.5 bg-emerald-200 text-emerald-900 rounded font-mono">
-                Human-Confirmed Root Cause
+              <span className="font-bold uppercase tracking-wider text-[10px] px-2 py-0.5 bg-lime text-ink border border-white font-mono">
+                Confirmed Root Cause
               </span>
             </div>
-            <p className="mt-1 font-semibold text-emerald-900">
+            <p className="font-display font-bold text-sm text-white">
               {currentAnalysis.confirmed_root_cause}
             </p>
           </div>
@@ -397,14 +402,14 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
       )}
 
       {/* Navigation Tabs */}
-      <div className="flex border-b border-slate-200 bg-slate-50 text-xs overflow-x-auto">
+      <div className="flex border-b-2 border-ink bg-paper text-xs font-mono font-bold overflow-x-auto">
         <button
           type="button"
           onClick={() => setActiveTab('evidence')}
-          className={`flex-1 py-2.5 px-2 text-center font-medium border-b-2 whitespace-nowrap transition-colors ${
+          className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors border-r-2 border-ink ${
             activeTab === 'evidence'
-              ? 'border-teal-600 text-teal-700 bg-white font-semibold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'bg-ink text-lime'
+              : 'bg-paper text-muted hover:text-ink hover:bg-white'
           }`}
         >
           Evidence & Gaps
@@ -412,10 +417,10 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('causes')}
-          className={`flex-1 py-2.5 px-2 text-center font-medium border-b-2 whitespace-nowrap transition-colors ${
+          className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors border-r-2 border-ink ${
             activeTab === 'causes'
-              ? 'border-teal-600 text-teal-700 bg-white font-semibold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'bg-ink text-lime'
+              : 'bg-paper text-muted hover:text-ink hover:bg-white'
           }`}
         >
           Potential Causes
@@ -423,10 +428,10 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('fiveWhys')}
-          className={`flex-1 py-2.5 px-2 text-center font-medium border-b-2 whitespace-nowrap transition-colors ${
+          className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors border-r-2 border-ink ${
             activeTab === 'fiveWhys'
-              ? 'border-teal-600 text-teal-700 bg-white font-semibold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'bg-ink text-lime'
+              : 'bg-paper text-muted hover:text-ink hover:bg-white'
           }`}
         >
           5 Whys
@@ -434,10 +439,10 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('fishbone')}
-          className={`flex-1 py-2.5 px-2 text-center font-medium border-b-2 whitespace-nowrap transition-colors ${
+          className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors border-r-2 border-ink ${
             activeTab === 'fishbone'
-              ? 'border-teal-600 text-teal-700 bg-white font-semibold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'bg-ink text-lime'
+              : 'bg-paper text-muted hover:text-ink hover:bg-white'
           }`}
         >
           Fishbone (6M)
@@ -445,10 +450,10 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('capa')}
-          className={`flex-1 py-2.5 px-2 text-center font-medium border-b-2 whitespace-nowrap transition-colors ${
+          className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors border-r-2 border-ink ${
             activeTab === 'capa'
-              ? 'border-teal-600 text-teal-700 bg-white font-semibold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'bg-ink text-lime'
+              : 'bg-paper text-muted hover:text-ink hover:bg-white'
           }`}
         >
           CAPA
@@ -456,16 +461,16 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('history')}
-          className={`flex-1 py-2.5 px-2 text-center font-medium border-b-2 whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 ${
+          className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 ${
             activeTab === 'history'
-              ? 'border-teal-600 text-teal-700 bg-white font-semibold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'bg-ink text-lime'
+              : 'bg-paper text-muted hover:text-ink hover:bg-white'
           }`}
         >
           <History className="w-3.5 h-3.5" />
           <span>Audit Trail</span>
           {auditLogs.length > 0 && (
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700 font-mono font-semibold">
+            <span className="text-[10px] px-1.5 py-0.2 bg-white text-ink border border-ink font-mono font-bold">
               {auditLogs.length}
             </span>
           )}
@@ -473,36 +478,36 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
       </div>
 
       {/* Tab Content Container */}
-      <div className="p-4 flex-1 overflow-y-auto space-y-4">
+      <div className="p-4 flex-1 overflow-y-auto space-y-4 bg-paper">
         {/* TAB 1: Evidence & Gaps */}
         {activeTab === 'evidence' && (
           <div className="space-y-4">
             {/* Attached Sources Summary */}
-            <div className="border border-slate-200 rounded-lg p-3.5 bg-slate-50/50">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <Layers className="w-3.5 h-3.5 text-teal-600" />
+            <div className="border-2 border-ink bg-white p-4 shadow-brutal-sm">
+              <div className="flex items-center justify-between mb-3 border-b-2 border-ink pb-2">
+                <span className="font-display text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-teal" />
                   Attached Sources ({attachedSources.length})
                 </span>
                 <button
                   type="button"
                   onClick={onOpenSourceIntake}
-                  className="text-xs text-teal-600 hover:text-teal-800 font-semibold"
+                  className="btn-brutal-secondary text-[11px] py-1 px-2.5"
                 >
                   + Add Source
                 </button>
               </div>
 
               {attachedSources.length === 0 ? (
-                <div className="text-center py-4 bg-white border border-dashed border-slate-200 rounded-md">
-                  <FileText className="w-6 h-6 text-slate-300 mx-auto mb-1" />
-                  <p className="text-xs text-slate-500 font-medium">No source documents attached yet.</p>
+                <div className="text-center py-6 bg-paper border-2 border-dashed border-subtle">
+                  <FileText className="w-8 h-8 text-muted mx-auto mb-2" />
+                  <p className="text-xs font-mono text-muted">No source documents attached yet.</p>
                   <button
                     type="button"
                     onClick={onOpenSourceIntake}
-                    className="mt-2 text-xs text-teal-600 hover:underline font-semibold"
+                    className="mt-2 text-xs font-mono font-bold text-teal hover:underline uppercase"
                   >
-                    Upload PDF or Paste Incident Text
+                    Upload PDF or Paste Incident Text →
                   </button>
                 </div>
               ) : (
@@ -510,19 +515,19 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                   {attachedSources.map((doc) => (
                     <div
                       key={doc.id || doc.source_id}
-                      className="p-2.5 bg-white border border-slate-200 rounded-md text-xs space-y-1 shadow-2xs"
+                      className="p-3 bg-paper border-2 border-ink text-xs space-y-2 shadow-xs"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-semibold text-slate-800 truncate max-w-[200px]">
+                        <span className="font-bold text-ink truncate max-w-[240px]">
                           {doc.original_filename || doc.source_id}
                         </span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 uppercase font-mono">
+                        <span className="text-[10px] px-2 py-0.5 bg-white text-ink border border-ink uppercase font-mono font-bold">
                           {doc.source_type}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between text-[11px] text-slate-400">
+                      <div className="flex items-center justify-between text-[11px] font-mono text-muted pt-1 border-t border-subtle">
                         <span>
-                          Status: <strong className="text-teal-700">{doc.extraction_status}</strong>
+                          Status: <strong className="text-teal font-bold">{doc.extraction_status}</strong>
                         </span>
                         <div className="flex items-center gap-2">
                           <button
@@ -534,7 +539,7 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                                 title: doc.original_filename || doc.source_id,
                               })
                             }
-                            className="text-teal-600 hover:text-teal-800 inline-flex items-center gap-1 font-medium"
+                            className="btn-brutal-secondary text-[10px] py-1 px-2 flex items-center gap-1"
                           >
                             <Eye className="w-3 h-3" />
                             <span>View Text</span>
@@ -542,7 +547,7 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                           <button
                             type="button"
                             onClick={() => handleDetachSource(doc)}
-                            className="text-rose-600 hover:text-rose-800 inline-flex items-center gap-1 font-medium"
+                            className="btn-brutal-danger text-[10px] py-1 px-2 flex items-center gap-1"
                             title="Detach document from this investigation"
                           >
                             <Unlink className="w-3 h-3" />
@@ -558,13 +563,15 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
 
             {/* Proposed Form Updates from Extracted Facts */}
             {structured?.extracted_facts && structured.extracted_facts.length > 0 && (
-              <div className="border border-teal-200 bg-teal-50/40 rounded-lg p-3.5 space-y-2">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-teal-900 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-teal-600" />
+              <div className="border-2 border-ink bg-[#F0FDF4] p-4 shadow-brutal-sm space-y-3">
+                <div className="flex items-center justify-between border-b-2 border-ink pb-2">
+                  <h4 className="font-display text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-teal" />
                     AI-Proposed Form Updates ({structured.extracted_facts.length})
                   </h4>
-                  <span className="text-[10px] text-teal-700 font-medium">Review before applying</span>
+                  <span className="font-mono text-[10px] bg-white px-2 py-0.5 border border-ink font-bold text-ink">
+                    Review Before Applying
+                  </span>
                 </div>
                 <div className="space-y-2">
                   {structured.extracted_facts.map((fact, idx) => {
@@ -574,46 +581,46 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                     return (
                       <div
                         key={idx}
-                        className={`p-2.5 bg-white border rounded-md text-xs space-y-1.5 transition-colors ${
+                        className={`p-3 bg-white border-2 border-ink text-xs space-y-2 transition-all shadow-xs ${
                           isAccepted
-                            ? 'border-emerald-300 bg-emerald-50/40'
+                            ? 'bg-[#ECFDF5] border-teal'
                             : isRejected
-                            ? 'border-slate-200 opacity-50 bg-slate-50'
-                            : 'border-teal-200'
+                            ? 'opacity-50 bg-gray-100'
+                            : ''
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold text-slate-800 capitalize">
+                          <span className="font-mono font-bold text-ink uppercase text-[11px]">
                             {fact.field_name.replace(/_/g, ' ')}
                           </span>
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-teal-100 text-teal-800 font-mono">
+                          <span className="text-[10px] px-2 py-0.5 bg-lime text-ink border border-ink font-mono font-bold">
                             {Math.round(fact.confidence_score * 100)}% match
                           </span>
                         </div>
 
-                        <div className="p-2 bg-slate-50 rounded border border-slate-100 font-mono text-[11px] text-slate-800">
+                        <div className="p-2.5 bg-paper border border-ink font-mono text-[11px] text-ink font-semibold">
                           {fact.extracted_value}
                         </div>
 
                         {fact.source_snippet && (
-                          <div className="text-[10px] text-slate-500 italic">
+                          <div className="text-[10px] font-mono text-muted italic bg-white p-1.5 border border-subtle">
                             Evidence: "{fact.source_snippet}" ({fact.source_id})
                           </div>
                         )}
 
-                        <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
+                        <div className="flex items-center justify-end gap-2 pt-2 border-t border-subtle">
                           {isAccepted ? (
-                            <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
+                            <span className="font-mono text-[11px] text-teal font-bold flex items-center gap-1">
                               <Check className="w-3.5 h-3.5" /> Applied to Record (Audited)
                             </span>
                           ) : isRejected ? (
-                            <span className="text-[11px] text-slate-400 italic">Dismissed</span>
+                            <span className="font-mono text-[11px] text-muted italic">Dismissed</span>
                           ) : (
                             <>
                               <button
                                 type="button"
                                 onClick={() => handleRejectFact(fact)}
-                                className="px-2 py-1 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded text-[11px] font-medium"
+                                className="btn-brutal-secondary text-[10px] py-1 px-2"
                               >
                                 Reject
                               </button>
@@ -627,7 +634,7 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                                     notes: 'Verified and applied by investigator.',
                                   })
                                 }
-                                className="px-2 py-1 text-teal-700 hover:bg-teal-50 border border-teal-300 rounded text-[11px] font-medium flex items-center gap-1"
+                                className="btn-brutal-secondary text-[10px] py-1 px-2.5 flex items-center gap-1"
                               >
                                 <Edit3 className="w-3 h-3" />
                                 <span>Edit & Apply</span>
@@ -635,7 +642,7 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                               <button
                                 type="button"
                                 onClick={() => handleAcceptFact(fact)}
-                                className="px-2.5 py-1 bg-teal-600 hover:bg-teal-700 text-white rounded text-[11px] font-semibold flex items-center gap-1"
+                                className="btn-brutal-primary text-[10px] py-1 px-2.5 flex items-center gap-1 bg-teal"
                               >
                                 <Check className="w-3 h-3" />
                                 <span>Accept Update</span>
@@ -651,58 +658,58 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
             )}
 
             {/* Evidence Gaps & Missing Records Checklist */}
-            <div className="border border-slate-200 rounded-lg p-3.5">
-              <h4 className="text-xs font-bold text-slate-800 mb-2 flex items-center justify-between">
-                <span>Identified Evidence Gaps</span>
+            <div className="border-2 border-ink bg-[#FEF9C3] p-4 shadow-brutal-sm space-y-3">
+              <div className="flex items-center justify-between border-b-2 border-ink pb-2">
+                <span className="font-display text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-700" />
+                  Identified Evidence Gaps
+                </span>
                 {structured?.evidence_gaps && structured.evidence_gaps.length > 0 ? (
-                  <span className="text-[11px] text-amber-600 font-semibold flex items-center gap-1">
-                    <AlertCircle className="w-3.5 h-3.5" />
+                  <span className="font-mono text-[10px] bg-red-100 text-red-900 border border-ink px-2 py-0.5 font-bold uppercase">
                     {structured.evidence_gaps.length} Critical Record Gap{structured.evidence_gaps.length > 1 ? 's' : ''}
                   </span>
                 ) : (
-                  <span className="text-[11px] text-slate-400">Run analysis to identify gaps</span>
+                  <span className="font-mono text-[10px] text-muted">Run analysis to identify gaps</span>
                 )}
-              </h4>
+              </div>
 
               {structured?.evidence_gaps && structured.evidence_gaps.length > 0 ? (
                 <div className="space-y-2">
                   {structured.evidence_gaps.map((gap) => (
                     <div
                       key={gap.gap_id}
-                      className="p-2.5 bg-amber-50/50 border border-amber-200 rounded-md text-xs space-y-1.5"
+                      className="p-3 bg-white border-2 border-ink text-xs space-y-2 shadow-xs"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-semibold text-amber-950 flex items-center gap-1.5">
-                          <span className="px-1.5 py-0.2 bg-amber-200 text-amber-900 rounded font-mono text-[10px]">
+                        <span className="font-bold text-ink flex items-center gap-2">
+                          <span className="px-1.5 py-0.5 bg-ink text-lime font-mono text-[10px] font-bold">
                             {gap.gap_id}
                           </span>
-                          {gap.category}
+                          <span className="font-mono text-xs uppercase">{gap.category}</span>
                         </span>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase ${
-                              gap.priority === 'High'
-                                ? 'bg-rose-100 text-rose-700 border border-rose-300'
-                                : 'bg-amber-100 text-amber-800'
-                            }`}
-                          >
-                            {gap.priority} Priority
-                          </span>
-                        </div>
+                        <span
+                          className={`text-[10px] px-2 py-0.5 border border-ink font-mono font-bold uppercase ${
+                            gap.priority === 'High'
+                              ? 'bg-red-200 text-red-900'
+                              : 'bg-amber-100 text-amber-900'
+                          }`}
+                        >
+                          {gap.priority} Priority
+                        </span>
                       </div>
-                      <p className="text-slate-700 leading-snug">{gap.description}</p>
-                      <div className="text-[11px] text-slate-500">
-                        <strong className="text-slate-700">Recommended Evidence:</strong>{' '}
+                      <p className="text-ink leading-snug">{gap.description}</p>
+                      <div className="text-[11px] font-mono text-muted">
+                        <strong className="text-ink">Recommended Evidence:</strong>{' '}
                         {gap.recommended_evidence_to_obtain}
                       </div>
-                      <div className="text-[10px] text-slate-400 italic">
+                      <div className="text-[10px] font-mono text-muted italic">
                         Why it matters: {gap.why_it_matters}
                       </div>
 
                       {/* Investigator Gap Review Status */}
-                      <div className="flex items-center justify-between pt-1.5 border-t border-amber-200/60">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] text-amber-950 font-semibold">Review Status:</span>
+                      <div className="flex items-center justify-between pt-2 border-t border-subtle">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-[10px] text-ink font-bold uppercase">Review Status:</span>
                           <select
                             value={gap.status || 'open'}
                             onChange={(e) =>
@@ -713,7 +720,7 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                                 })
                               )
                             }
-                            className="text-[10px] border border-amber-300 rounded px-1.5 py-0.5 bg-white font-medium text-amber-950 focus:outline-none"
+                            className="input-brutal text-[10px] py-1 px-2 font-mono font-semibold"
                           >
                             <option value="open">Open (Unresolved)</option>
                             <option value="addressed">Addressed in Investigation</option>
@@ -721,8 +728,8 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                           </select>
                         </div>
                         {gap.status === 'resolved' && (
-                          <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-0.5">
-                            <CheckCircle2 className="w-3 h-3" /> Resolved
+                          <span className="font-mono text-[10px] text-teal font-bold flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Resolved
                           </span>
                         )}
                       </div>
@@ -730,7 +737,7 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-slate-400 italic text-center py-2">
+                <p className="text-xs font-mono text-muted italic text-center py-4 bg-white border border-subtle">
                   No evidence gaps recorded. Execute AI analysis to screen for missing batch, trend, or calibration records.
                 </p>
               )}
@@ -741,15 +748,15 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
         {/* TAB 2: Potential Causes & Human Confirmation */}
         {activeTab === 'causes' && (
           <div className="space-y-4">
-            <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1">
-              <div className="font-bold text-slate-800 flex items-center justify-between">
+            <div className="p-3 bg-white border-2 border-ink shadow-brutal-sm text-xs space-y-1">
+              <div className="font-display font-bold text-xs uppercase tracking-wider text-ink flex items-center justify-between">
                 <span>Causal Hypotheses Evaluation</span>
-                <span className="text-[10px] text-slate-500">
+                <span className="font-mono text-[10px] bg-paper px-2 py-0.5 border border-ink text-muted font-bold">
                   {structured?.potential_root_causes?.length || 0} candidate causes
                 </span>
               </div>
-              <p className="text-slate-600 text-[11px]">
-                Ranked by thermodynamic and process evidence. Review hypotheses and select one to confirm.
+              <p className="text-muted text-[11px] font-mono">
+                Ranked by thermodynamic and process evidence. Review hypotheses and click "Confirm Cause" to persist as verified finding.
               </p>
             </div>
 
@@ -763,34 +770,34 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                   return (
                     <div
                       key={cause.cause_id}
-                      className={`p-3.5 border rounded-lg text-xs space-y-2 transition-all ${
+                      className={`p-4 border-2 border-ink text-xs space-y-3 transition-all ${
                         causeConfirmed
-                          ? 'border-emerald-400 bg-emerald-50/60 shadow-xs ring-1 ring-emerald-400'
+                          ? 'bg-[#F0FDFA] shadow-brutal-teal border-teal'
                           : isSelected
-                          ? 'border-teal-400 bg-teal-50/30'
-                          : 'border-slate-200 bg-white hover:border-slate-300'
+                          ? 'bg-lime/20 shadow-brutal'
+                          : 'bg-white shadow-brutal-sm'
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[10px] font-mono px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded font-semibold">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-mono text-[10px] px-2 py-0.5 bg-ink text-white font-bold">
                               {cause.cause_id}
                             </span>
-                            <span className="text-[10px] px-2 py-0.5 rounded font-semibold uppercase bg-teal-100 text-teal-800">
+                            <span className="text-[10px] px-2 py-0.5 bg-paper text-ink border border-ink font-mono font-bold uppercase">
                               {cause.category}
                             </span>
                             <span
-                              className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
+                              className={`text-[10px] px-2 py-0.5 border border-ink font-mono font-bold uppercase ${
                                 causeConfirmed
-                                  ? 'bg-emerald-600 text-white'
-                                  : 'bg-amber-100 text-amber-800'
+                                  ? 'bg-teal text-white'
+                                  : 'bg-amber-100 text-amber-900'
                               }`}
                             >
                               {causeConfirmed ? 'Confirmed' : cause.review_status}
                             </span>
                           </div>
-                          <h5 className="font-bold text-slate-900 mt-1.5 text-xs">{cause.title}</h5>
+                          <h5 className="font-display font-bold text-ink text-sm mt-1">{cause.title}</h5>
                         </div>
 
                         {/* Human Review Decision Buttons */}
@@ -807,14 +814,14 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                                 })
                               );
                             }}
-                            className={`px-2 py-1 rounded text-[10px] font-semibold transition-colors flex items-center gap-1 ${
+                            className={`px-2.5 py-1.5 border-2 border-ink text-[10px] font-mono font-bold uppercase transition-all shadow-[2px_2px_0px_#171717] hover:translate-x-[1px] hover:translate-y-[1px] flex items-center gap-1 ${
                               causeConfirmed
-                                ? 'bg-emerald-600 text-white'
-                                : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300'
+                                ? 'bg-teal text-white'
+                                : 'bg-lime text-ink hover:bg-white'
                             }`}
                           >
                             <Award className="w-3 h-3" />
-                            <span>{causeConfirmed ? 'Confirmed' : 'Accept Cause'}</span>
+                            <span>{causeConfirmed ? 'Confirmed' : 'Confirm Cause'}</span>
                           </button>
 
                           <button
@@ -831,10 +838,10 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                                 })
                               );
                             }}
-                            className={`px-2 py-1 rounded text-[10px] font-semibold transition-colors ${
+                            className={`px-2.5 py-1.5 border-2 border-ink text-[10px] font-mono font-bold uppercase transition-all shadow-[2px_2px_0px_#171717] ${
                               cause.review_status === 'needs_evidence'
-                                ? 'bg-amber-600 text-white'
-                                : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-300'
+                                ? 'bg-amber-400 text-ink'
+                                : 'bg-paper text-ink hover:bg-white'
                             }`}
                           >
                             <span>Needs Evidence</span>
@@ -854,10 +861,10 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                                 })
                               );
                             }}
-                            className={`px-2 py-1 rounded text-[10px] font-semibold transition-colors ${
+                            className={`px-2.5 py-1.5 border-2 border-ink text-[10px] font-mono font-bold uppercase transition-all shadow-[2px_2px_0px_#171717] ${
                               cause.review_status === 'rejected'
-                                ? 'bg-rose-600 text-white'
-                                : 'bg-rose-50 text-rose-800 hover:bg-rose-100 border border-rose-300'
+                                ? 'bg-red-500 text-white'
+                                : 'bg-white text-red-700 hover:bg-red-50'
                             }`}
                           >
                             <span>Reject</span>
@@ -865,16 +872,16 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                         </div>
                       </div>
 
-                      <p className="text-slate-700 leading-relaxed text-[11px]">{cause.explanation}</p>
+                      <p className="text-ink leading-relaxed text-xs">{cause.explanation}</p>
 
                       {/* Supporting Evidence Excerpts */}
                       {cause.supporting_excerpts && cause.supporting_excerpts.length > 0 && (
-                        <div className="p-2 bg-slate-50 rounded border border-slate-100 space-y-1">
-                          <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
-                            Supporting Excerpts
+                        <div className="p-3 bg-paper border-2 border-subtle space-y-1.5">
+                          <span className="font-mono text-[10px] font-bold text-muted uppercase tracking-wider block">
+                            Documented Supporting Excerpts
                           </span>
                           {cause.supporting_excerpts.map((exc, i) => (
-                            <p key={i} className="text-[11px] text-slate-700 italic">
+                            <p key={i} className="font-mono text-[11px] text-ink italic border-l-2 border-teal pl-2">
                               "{exc}"
                             </p>
                           ))}
@@ -882,10 +889,10 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                       )}
 
                       {/* Missing Evidence / Next Step */}
-                      <div className="text-[11px] text-slate-600 space-y-1 pt-1 border-t border-slate-100">
+                      <div className="text-[11px] font-mono text-muted space-y-1 pt-2 border-t border-subtle">
                         {cause.recommended_next_step && (
                           <div>
-                            <strong className="text-slate-800">Recommended Verification Step:</strong>{' '}
+                            <strong className="text-ink">Recommended Verification Step:</strong>{' '}
                             {cause.recommended_next_step}
                           </div>
                         )}
@@ -895,15 +902,15 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                 })}
               </div>
             ) : (
-              <div className="text-center py-8 border border-dashed border-slate-200 rounded-lg">
-                <HelpCircle className="w-7 h-7 text-slate-300 mx-auto mb-1.5" />
-                <p className="text-xs text-slate-500 font-medium">No causal hypotheses generated yet.</p>
+              <div className="text-center py-10 border-2 border-dashed border-subtle bg-white">
+                <HelpCircle className="w-8 h-8 text-muted mx-auto mb-2" />
+                <p className="text-xs font-mono text-muted">No causal hypotheses generated yet.</p>
                 <button
                   type="button"
                   onClick={handleRunFullAnalysis}
-                  className="mt-2 text-xs text-teal-600 hover:underline font-semibold"
+                  className="mt-2 text-xs font-mono font-bold text-teal hover:underline uppercase"
                 >
-                  Run Analysis to evaluate causes
+                  Run Analysis to evaluate causes →
                 </button>
               </div>
             )}
@@ -913,51 +920,51 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
         {/* TAB 3: 5 Whys Analysis */}
         {activeTab === 'fiveWhys' && (
           <div className="space-y-4">
-            <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1">
+            <div className="p-3 bg-white border-2 border-ink shadow-brutal-sm text-xs space-y-1">
               <div className="flex items-center justify-between">
-                <h4 className="font-bold text-slate-800 flex items-center gap-1.5">
-                  <GitBranch className="w-4 h-4 text-teal-600" />
+                <h4 className="font-display font-bold text-xs uppercase tracking-wider text-ink flex items-center gap-2">
+                  <GitBranch className="w-4 h-4 text-teal" />
                   Iterative 5 Whys Causal Sequence
                 </h4>
                 <button
                   type="button"
                   onClick={() => dispatch(addLocalFiveWhysStep())}
-                  className="text-xs text-teal-600 hover:text-teal-800 font-semibold flex items-center gap-1"
+                  className="btn-brutal-secondary text-[10px] py-1 px-2.5 flex items-center gap-1"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Add Step
                 </button>
               </div>
-              <p className="text-slate-600 text-[11px]">
+              <p className="text-muted text-[11px] font-mono">
                 Grounds each deductive step in documented source facts without forcing unsupported speculation.
               </p>
             </div>
 
             {structured?.five_whys?.problem_statement && (
-              <div className="p-2.5 bg-slate-100 rounded-md text-xs">
-                <span className="font-bold text-slate-700 block text-[10px] uppercase tracking-wider mb-0.5">
-                  Initial Problem Statement
+              <div className="p-3 bg-paper border-2 border-ink text-xs shadow-xs">
+                <span className="font-mono text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">
+                  Problem Statement
                 </span>
-                <p className="font-medium text-slate-900">{structured.five_whys.problem_statement}</p>
+                <p className="font-display font-bold text-ink text-sm">{structured.five_whys.problem_statement}</p>
               </div>
             )}
 
             {structured?.five_whys?.steps && structured.five_whys.steps.length > 0 ? (
               <div className="space-y-3">
                 {structured.five_whys.steps.map((step, idx) => (
-                  <div key={idx} className="p-3 bg-white border border-slate-200 rounded-lg text-xs space-y-2 shadow-2xs">
+                  <div key={idx} className="p-4 bg-white border-2 border-ink shadow-brutal-sm text-xs space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-[10px]">
+                        <span className="w-6 h-6 bg-ink text-lime border-2 border-ink flex items-center justify-center font-mono font-bold text-xs">
                           {step.level}
                         </span>
                         <span
-                          className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase ${
+                          className={`text-[10px] px-2 py-0.5 border border-ink font-mono font-bold uppercase ${
                             step.status === 'supported'
-                              ? 'bg-emerald-100 text-emerald-800'
+                              ? 'bg-lime text-ink'
                               : step.status === 'tentative'
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-rose-100 text-rose-800'
+                              ? 'bg-amber-100 text-amber-900'
+                              : 'bg-red-100 text-red-900'
                           }`}
                         >
                           {step.status}
@@ -975,7 +982,7 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                               })
                             )
                           }
-                          className="text-[11px] border border-slate-200 rounded px-1.5 py-0.5 bg-white text-slate-700"
+                          className="input-brutal text-[10px] py-1 px-2 font-mono font-semibold"
                         >
                           <option value="supported">Supported</option>
                           <option value="tentative">Tentative</option>
@@ -984,15 +991,15 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                         <button
                           type="button"
                           onClick={() => dispatch(removeLocalFiveWhysStep(idx))}
-                          className="text-slate-400 hover:text-rose-600"
+                          className="text-muted hover:text-red-600 p-1"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-0.5">
+                      <label className="font-mono text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">
                         Question:
                       </label>
                       <input
@@ -1006,12 +1013,12 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                             })
                           )
                         }
-                        className="w-full text-xs font-semibold text-slate-900 border border-slate-200 rounded px-2 py-1 focus:border-teal-500 outline-none"
+                        className="input-brutal w-full text-xs font-bold"
                       />
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-0.5">
+                      <label className="font-mono text-[10px] font-bold text-muted uppercase tracking-wider block mb-1">
                         Answer:
                       </label>
                       <textarea
@@ -1025,12 +1032,12 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                             })
                           )
                         }
-                        className="w-full text-xs text-slate-700 border border-slate-200 rounded px-2 py-1 focus:border-teal-500 outline-none"
+                        className="input-brutal w-full text-xs"
                       />
                     </div>
 
                     {step.supporting_evidence && (
-                      <div className="text-[10px] text-teal-800 bg-teal-50/50 p-1.5 rounded">
+                      <div className="font-mono text-[11px] text-teal bg-[#F0FDFA] p-2 border border-teal">
                         <strong>Evidence:</strong> {step.supporting_evidence}
                       </div>
                     )}
@@ -1038,15 +1045,15 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                 ))}
 
                 {structured.five_whys.derived_root_cause_hypothesis && (
-                  <div className="p-3 bg-teal-50/80 border border-teal-200 rounded-lg text-xs space-y-1">
-                    <span className="font-bold text-teal-950 uppercase tracking-wider text-[10px] block">
+                  <div className="p-4 bg-teal text-white border-2 border-ink shadow-brutal-teal text-xs space-y-1.5">
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-lime block">
                       Derived Root Cause Hypothesis
                     </span>
-                    <p className="text-teal-900 font-medium">
+                    <p className="font-display font-bold text-sm text-white">
                       {structured.five_whys.derived_root_cause_hypothesis}
                     </p>
                     {structured.five_whys.evidence_limitation_note && (
-                      <p className="text-[11px] text-teal-700 italic">
+                      <p className="font-mono text-[11px] text-teal-100 italic pt-1 border-t border-teal-600">
                         Limitation: {structured.five_whys.evidence_limitation_note}
                       </p>
                     )}
@@ -1054,15 +1061,15 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                 )}
               </div>
             ) : (
-              <div className="text-center py-8 border border-dashed border-slate-200 rounded-lg">
-                <GitBranch className="w-7 h-7 text-slate-300 mx-auto mb-1.5" />
-                <p className="text-xs text-slate-500 font-medium">No 5 Whys sequence executed yet.</p>
+              <div className="text-center py-10 border-2 border-dashed border-subtle bg-white">
+                <GitBranch className="w-8 h-8 text-muted mx-auto mb-2" />
+                <p className="text-xs font-mono text-muted">No 5 Whys sequence executed yet.</p>
                 <button
                   type="button"
                   onClick={() => handleRunTargeted('fiveWhys')}
-                  className="mt-2 text-xs text-teal-600 hover:underline font-semibold"
+                  className="mt-2 text-xs font-mono font-bold text-teal hover:underline uppercase"
                 >
-                  Generate 5 Whys Analysis
+                  Generate 5 Whys Analysis →
                 </button>
               </div>
             )}
@@ -1072,14 +1079,14 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
         {/* TAB 4: Fishbone Analysis (6M Ishikawa) */}
         {activeTab === 'fishbone' && (
           <div className="space-y-4">
-            <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1">
+            <div className="p-3 bg-white border-2 border-ink shadow-brutal-sm text-xs space-y-1">
               <div className="flex items-center justify-between">
-                <h4 className="font-bold text-slate-800 flex items-center gap-1.5">
-                  <Network className="w-4 h-4 text-teal-600" />
+                <h4 className="font-display font-bold text-xs uppercase tracking-wider text-ink flex items-center gap-2">
+                  <Network className="w-4 h-4 text-teal" />
                   Ishikawa 6M Cause Matrix
                 </h4>
               </div>
-              <p className="text-slate-600 text-[11px]">
+              <p className="text-muted text-[11px] font-mono">
                 Distributes verified and tentative contributing factors across the 6 standard pharmaceutical manufacturing domains.
               </p>
             </div>
@@ -1094,10 +1101,12 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                   { key: 'milieu_environment', label: 'Milieu (Cleanroom & Humidity)', items: structured.fishbone.milieu_environment },
                   { key: 'manpower_people', label: 'Manpower (Training & Shift)', items: structured.fishbone.manpower_people },
                 ].map((category) => (
-                  <div key={category.key} className="border border-slate-200 rounded-lg p-3 bg-white">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-bold text-slate-800 text-xs">{category.label}</span>
-                      <span className="text-[10px] px-1.5 py-0.2 bg-slate-100 text-slate-600 rounded font-mono font-semibold">
+                  <div key={category.key} className="border-2 border-ink bg-white p-3.5 shadow-brutal-sm">
+                    <div className="flex items-center justify-between mb-2.5 border-b border-subtle pb-1.5">
+                      <span className="font-display font-bold text-ink text-xs uppercase tracking-wide">
+                        {category.label}
+                      </span>
+                      <span className="text-[10px] px-2 py-0.5 bg-paper text-ink border border-ink font-mono font-bold">
                         {category.items?.length || 0} factors
                       </span>
                     </div>
@@ -1107,27 +1116,27 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                         {category.items.map((item) => (
                           <div
                             key={item.cause_id}
-                            className="p-2 bg-slate-50 rounded border border-slate-100 text-xs space-y-1"
+                            className="p-2.5 bg-paper border border-ink text-xs space-y-1.5"
                           >
                             <div className="flex items-center justify-between">
-                              <span className="font-semibold text-slate-900">{item.cause}</span>
+                              <span className="font-bold text-ink">{item.cause}</span>
                               <span
-                                className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${
+                                className={`text-[9px] px-1.5 py-0.5 border border-ink font-mono font-bold uppercase ${
                                   item.status === 'supported'
-                                    ? 'bg-emerald-100 text-emerald-800'
-                                    : 'bg-amber-100 text-amber-800'
+                                    ? 'bg-lime text-ink'
+                                    : 'bg-amber-100 text-amber-900'
                                 }`}
                               >
                                 {item.status}
                               </span>
                             </div>
                             {item.evidence && (
-                              <p className="text-[10px] text-slate-500 italic">
+                              <p className="font-mono text-[10px] text-muted italic">
                                 Evidence: "{item.evidence}"
                               </p>
                             )}
                             {item.verification_action && (
-                              <p className="text-[10px] text-teal-700">
+                              <p className="font-mono text-[10px] text-teal font-semibold">
                                 Action: {item.verification_action}
                               </p>
                             )}
@@ -1135,7 +1144,7 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                         ))}
                       </div>
                     ) : (
-                      <p className="text-[11px] text-slate-400 italic">
+                      <p className="text-[11px] font-mono text-muted italic">
                         No supported causes identified from supplied evidence for this category.
                       </p>
                     )}
@@ -1143,24 +1152,26 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                 ))}
 
                 {structured.fishbone.summary_observations && (
-                  <div className="p-3 bg-slate-100 rounded-lg text-xs text-slate-800">
-                    <span className="font-bold block text-[10px] uppercase text-slate-500 mb-0.5">
+                  <div className="p-3 bg-paper border-2 border-ink text-xs text-ink shadow-xs">
+                    <span className="font-mono font-bold block text-[10px] uppercase text-muted mb-1">
                       Fishbone Summary Observations
                     </span>
-                    {structured.fishbone.summary_observations}
+                    <p className="font-mono text-[11px] leading-relaxed">
+                      {structured.fishbone.summary_observations}
+                    </p>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="text-center py-8 border border-dashed border-slate-200 rounded-lg">
-                <Network className="w-7 h-7 text-slate-300 mx-auto mb-1.5" />
-                <p className="text-xs text-slate-500 font-medium">No Fishbone matrix generated yet.</p>
+              <div className="text-center py-10 border-2 border-dashed border-subtle bg-white">
+                <Network className="w-8 h-8 text-muted mx-auto mb-2" />
+                <p className="text-xs font-mono text-muted">No Fishbone matrix generated yet.</p>
                 <button
                   type="button"
                   onClick={() => handleRunTargeted('fishbone')}
-                  className="mt-2 text-xs text-teal-600 hover:underline font-semibold"
+                  className="mt-2 text-xs font-mono font-bold text-teal hover:underline uppercase"
                 >
-                  Generate 6M Fishbone Analysis
+                  Generate 6M Fishbone Analysis →
                 </button>
               </div>
             )}
@@ -1170,15 +1181,15 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
         {/* TAB 5: CAPA Recommendations */}
         {activeTab === 'capa' && (
           <div className="space-y-4">
-            <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1">
+            <div className="p-3 bg-white border-2 border-ink shadow-brutal-sm text-xs space-y-1">
               <div className="flex items-center justify-between">
-                <h4 className="font-bold text-slate-800 flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-teal-600" />
+                <h4 className="font-display font-bold text-xs uppercase tracking-wider text-ink flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-teal" />
                   Intelligent CAPA Recommendations
                 </h4>
               </div>
-              <p className="text-slate-600 text-[11px]">
-                Distinguishes immediate quarantine containment from permanent corrective and preventive actions.
+              <p className="text-muted text-[11px] font-mono">
+                Distinguishes immediate containment from permanent corrective and preventive actions.
               </p>
             </div>
 
@@ -1187,30 +1198,30 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                 {structured.capa_recommendations.map((capa) => (
                   <div
                     key={capa.action_id}
-                    className="p-3.5 bg-white border border-slate-200 rounded-lg text-xs space-y-2 shadow-2xs"
+                    className="p-4 bg-white border-2 border-ink shadow-brutal-sm text-xs space-y-3"
                   >
-                    <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="text-[10px] font-mono px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded font-semibold">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-mono text-[10px] px-2 py-0.5 bg-ink text-white font-bold">
                             {capa.action_id}
                           </span>
                           <span
-                            className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${
+                            className={`text-[10px] px-2 py-0.5 border border-ink font-mono font-bold uppercase ${
                               capa.action_type.includes('Correction') || capa.action_type.includes('Containment')
                                 ? 'bg-amber-100 text-amber-900'
                                 : capa.action_type.includes('Corrective')
-                                ? 'bg-teal-100 text-teal-900'
-                                : 'bg-blue-100 text-blue-900'
+                                ? 'bg-teal text-white'
+                                : 'bg-lime text-ink'
                             }`}
                           >
                             {capa.action_type}
                           </span>
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold uppercase">
+                          <span className="text-[10px] px-2 py-0.5 bg-paper text-ink border border-ink font-mono font-bold uppercase">
                             {capa.suggested_priority} Priority
                           </span>
                         </div>
-                        <h5 className="font-bold text-slate-900 mt-1.5 text-xs">{capa.title}</h5>
+                        <h5 className="font-display font-bold text-ink text-sm mt-1.5">{capa.title}</h5>
                       </div>
 
                       {/* Review Status Selector */}
@@ -1224,7 +1235,7 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                             })
                           )
                         }
-                        className="text-[11px] border border-slate-200 rounded px-2 py-1 bg-white font-medium text-slate-700"
+                        className="input-brutal text-[10px] py-1 px-2 font-mono font-bold"
                       >
                         <option value="Proposed">Proposed</option>
                         <option value="Accepted">Accepted</option>
@@ -1233,26 +1244,26 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                       </select>
                     </div>
 
-                    <p className="text-slate-700 leading-relaxed text-[11px]">{capa.description}</p>
+                    <p className="text-ink leading-relaxed text-xs">{capa.description}</p>
 
-                    <div className="p-2 bg-slate-50 rounded border border-slate-100 space-y-1 text-[11px]">
+                    <div className="p-3 bg-paper border-2 border-subtle space-y-1.5 text-[11px] font-mono">
                       <div>
-                        <strong className="text-slate-700">Rationale:</strong> {capa.rationale}
+                        <strong className="text-ink">Rationale:</strong> {capa.rationale}
                       </div>
                       <div>
-                        <strong className="text-slate-700">Expected Outcome:</strong> {capa.expected_outcome}
+                        <strong className="text-ink">Expected Outcome:</strong> {capa.expected_outcome}
                       </div>
                       <div>
-                        <strong className="text-slate-700">Effectiveness Check:</strong>{' '}
+                        <strong className="text-ink">Effectiveness Check:</strong>{' '}
                         {capa.effectiveness_check_method}
                       </div>
                       <div>
-                        <strong className="text-slate-700">Closure Evidence Needed:</strong>{' '}
+                        <strong className="text-ink">Closure Evidence Needed:</strong>{' '}
                         {capa.evidence_needed_for_closure}
                       </div>
                       {capa.suggested_owner_role && (
-                        <div className="text-[10px] text-slate-500">
-                          Suggested Role: {capa.suggested_owner_role}
+                        <div className="text-[10px] text-muted pt-1 border-t border-subtle">
+                          Suggested Role: <strong className="text-ink">{capa.suggested_owner_role}</strong>
                         </div>
                       )}
                     </div>
@@ -1260,15 +1271,15 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 border border-dashed border-slate-200 rounded-lg">
-                <ShieldCheck className="w-7 h-7 text-slate-300 mx-auto mb-1.5" />
-                <p className="text-xs text-slate-500 font-medium">No CAPA recommendations generated yet.</p>
+              <div className="text-center py-10 border-2 border-dashed border-subtle bg-white">
+                <ShieldCheck className="w-8 h-8 text-muted mx-auto mb-2" />
+                <p className="text-xs font-mono text-muted">No CAPA recommendations generated yet.</p>
                 <button
                   type="button"
                   onClick={() => handleRunTargeted('capa')}
-                  className="mt-2 text-xs text-teal-600 hover:underline font-semibold"
+                  className="mt-2 text-xs font-mono font-bold text-teal hover:underline uppercase"
                 >
-                  Generate CAPA Actions
+                  Generate CAPA Actions →
                 </button>
               </div>
             )}
@@ -1279,61 +1290,61 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
         {activeTab === 'history' && (
           <div className="space-y-4">
             {/* Regulatory Compliance / Audit Trail Explanation */}
-            <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1">
+            <div className="p-3 bg-white border-2 border-ink shadow-brutal-sm text-xs space-y-1">
               <div className="flex items-center justify-between">
-                <h4 className="font-bold text-slate-800 flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-teal-600" />
+                <h4 className="font-display font-bold text-xs uppercase tracking-wider text-ink flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-teal" />
                   Audit Trail & Compliance History
                 </h4>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-teal-100 text-teal-800 font-semibold">
+                <span className="font-mono text-[10px] px-2 py-0.5 bg-lime text-ink border border-ink font-bold">
                   {auditLogs.length} Events Logged
                 </span>
               </div>
-              <p className="text-slate-600 text-[11px]">
-                Immutable, append-only record of all investigation updates, source attachments/detachments, LangGraph AI executions, and human quality review sign-offs.
+              <p className="text-muted text-[11px] font-mono">
+                Immutable, append-only record of all investigation updates, source attachments, LangGraph AI executions, and human quality review sign-offs.
               </p>
             </div>
 
             {/* Analysis Versions Card */}
             {history && history.length > 0 && (
-              <div className="border border-slate-200 rounded-lg p-3 bg-white space-y-2">
-                <h5 className="text-xs font-bold text-slate-800 flex items-center justify-between">
+              <div className="border-2 border-ink bg-white p-3.5 shadow-brutal-sm space-y-2">
+                <h5 className="font-display text-xs font-bold uppercase tracking-wider text-ink flex items-center justify-between border-b border-subtle pb-1.5">
                   <span>Intelligence Version History ({history.length})</span>
-                  <span className="text-[10px] text-slate-400">Preserved execution snapshots</span>
+                  <span className="font-mono text-[10px] text-muted">Preserved execution snapshots</span>
                 </h5>
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   {history.map((ver) => (
                     <div
                       key={ver.id}
-                      className={`p-2 rounded border text-xs flex items-center justify-between transition-colors ${
+                      className={`p-2.5 border-2 text-xs flex items-center justify-between transition-colors ${
                         ver.id === currentAnalysis?.id
-                          ? 'border-teal-500 bg-teal-50/50 ring-1 ring-teal-400'
-                          : 'border-slate-200 bg-slate-50/60'
+                          ? 'border-teal bg-[#F0FDFA]'
+                          : 'border-ink bg-paper'
                       }`}
                     >
-                      <div className="space-y-0.5">
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 bg-slate-200 text-slate-800 font-bold rounded">
+                          <span className="text-[10px] font-mono px-2 py-0.5 bg-ink text-white font-bold">
                             v{ver.version}
                           </span>
-                          <span className="font-semibold text-slate-900">
+                          <span className="font-bold text-ink">
                             {ver.model_identifier || 'Groq Engine'}
                           </span>
                           {ver.id === currentAnalysis?.id && (
-                            <span className="text-[9px] uppercase tracking-wide bg-teal-600 text-white px-1.5 py-0.2 rounded font-bold">
+                            <span className="text-[9px] uppercase tracking-wide bg-lime text-ink border border-ink px-1.5 py-0.2 font-mono font-bold">
                               Current
                             </span>
                           )}
                           {ver.is_confirmed_by_human && (
-                            <span className="text-[9px] uppercase tracking-wide bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-semibold flex items-center gap-0.5">
+                            <span className="text-[9px] uppercase tracking-wide bg-teal text-white px-1.5 py-0.2 font-mono font-bold flex items-center gap-0.5">
                               <Check className="w-2.5 h-2.5" /> QA Confirmed
                             </span>
                           )}
                         </div>
-                        <div className="text-[10px] text-slate-500 flex items-center gap-2">
+                        <div className="font-mono text-[10px] text-muted flex items-center gap-2">
                           <span>Created: {new Date(ver.created_at).toLocaleString()}</span>
                           {ver.confirmed_root_cause && (
-                            <span>• Cause: <strong className="text-slate-700 truncate max-w-[180px] inline-block align-bottom">{ver.confirmed_root_cause}</strong></span>
+                            <span>• Cause: <strong className="text-ink truncate max-w-[180px] inline-block align-bottom">{ver.confirmed_root_cause}</strong></span>
                           )}
                         </div>
                       </div>
@@ -1344,65 +1355,65 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
             )}
 
             {/* Audit Trail Events Timeline */}
-            <div className="border border-slate-200 rounded-lg p-3 bg-white space-y-2">
-              <h5 className="text-xs font-bold text-slate-800 flex items-center justify-between">
+            <div className="border-2 border-ink bg-white p-3.5 shadow-brutal-sm space-y-3">
+              <h5 className="font-display text-xs font-bold uppercase tracking-wider text-ink flex items-center justify-between border-b border-subtle pb-1.5">
                 <span>Append-Only Chronological Log</span>
-                <span className="text-[10px] text-slate-400">UTC Timestamps</span>
+                <span className="font-mono text-[10px] text-muted">UTC Timestamps</span>
               </h5>
 
               {auditLoading ? (
-                <div className="py-6 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
-                  <RotateCw className="w-3.5 h-3.5 animate-spin text-teal-600" />
+                <div className="py-6 text-center text-xs font-mono text-muted flex items-center justify-center gap-2">
+                  <RotateCw className="w-4 h-4 animate-spin text-teal" />
                   <span>Loading audit records...</span>
                 </div>
               ) : auditLogs.length === 0 ? (
-                <div className="py-6 text-center text-xs text-slate-400 italic">
+                <div className="py-6 text-center text-xs font-mono text-muted italic">
                   No audit trail events recorded yet.
                 </div>
               ) : (
-                <div className="space-y-2 divide-y divide-slate-100">
+                <div className="space-y-2">
                   {auditLogs.map((log) => {
                     const eventColors: Record<string, string> = {
-                      investigation_created: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-                      status_transitioned: 'bg-indigo-100 text-indigo-800 border-indigo-300',
-                      reopened: 'bg-amber-100 text-amber-900 border-amber-300',
-                      source_attached: 'bg-teal-100 text-teal-800 border-teal-300',
-                      source_detached: 'bg-rose-100 text-rose-800 border-rose-300',
-                      analysis_started: 'bg-blue-100 text-blue-800 border-blue-300',
-                      analysis_completed: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-                      analysis_failed: 'bg-rose-100 text-rose-900 border-rose-300',
-                      root_cause_confirmed: 'bg-purple-100 text-purple-900 border-purple-300',
-                      fact_applied: 'bg-teal-100 text-teal-800 border-teal-300',
-                      analysis_reviewed: 'bg-teal-100 text-teal-900 border-teal-300',
+                      investigation_created: 'bg-lime text-ink',
+                      status_transitioned: 'bg-teal text-white',
+                      reopened: 'bg-amber-200 text-amber-900',
+                      source_attached: 'bg-paper text-ink',
+                      source_detached: 'bg-red-200 text-red-900',
+                      analysis_started: 'bg-blue-100 text-blue-900',
+                      analysis_completed: 'bg-lime text-ink',
+                      analysis_failed: 'bg-red-200 text-red-900',
+                      root_cause_confirmed: 'bg-teal text-white',
+                      fact_applied: 'bg-[#F0FDFA] text-teal border-teal',
+                      analysis_reviewed: 'bg-paper text-ink',
                     };
-                    const colorClass = eventColors[log.event_type] || 'bg-slate-100 text-slate-800 border-slate-300';
+                    const colorClass = eventColors[log.event_type] || 'bg-paper text-ink';
 
                     return (
-                      <div key={log.id} className="pt-2 text-xs space-y-1">
+                      <div key={log.id} className="p-3 bg-paper border-2 border-ink text-xs space-y-1.5 shadow-xs">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border uppercase font-bold ${colorClass}`}>
+                            <span className={`text-[10px] font-mono px-2 py-0.5 border border-ink uppercase font-bold ${colorClass}`}>
                               {log.event_type.replace(/_/g, ' ')}
                             </span>
-                            <span className="text-[11px] font-semibold text-slate-800">
-                              Actor: <code className="text-teal-700 bg-slate-50 px-1 py-0.2 rounded border border-slate-200">{log.actor_id}</code>
+                            <span className="text-[11px] font-mono font-bold text-ink">
+                              Actor: <code className="text-teal bg-white px-1 py-0.2 border border-ink">{log.actor_id}</code>
                             </span>
                           </div>
-                          <span className="text-[10px] text-slate-400 font-mono">
+                          <span className="text-[10px] text-muted font-mono">
                             {new Date(log.created_at).toISOString().replace('T', ' ').substring(0, 19)} UTC
                           </span>
                         </div>
 
-                        <p className="text-slate-700 text-[11px] leading-snug">
+                        <p className="text-ink text-[11px] font-sans leading-snug">
                           {log.summary || `Action performed on ${log.entity_type}`}
                         </p>
 
                         {log.details && (
-                          <div className="flex items-center justify-end">
+                          <div className="flex items-center justify-end pt-1 border-t border-subtle">
                             <button
                               type="button"
                               onClick={() => setInspectAuditLog(log)}
-                              className="text-[10px] text-teal-600 hover:text-teal-800 font-medium inline-flex items-center gap-0.5"
+                              className="btn-brutal-secondary text-[10px] py-0.5 px-2 flex items-center gap-1 font-mono"
                             >
                               <span>Inspect Payload</span>
                               <ExternalLink className="w-2.5 h-2.5" />
@@ -1421,16 +1432,16 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
 
       {/* Review Confirmation & Persistence Footer */}
       {currentAnalysis && (
-        <div className="p-3.5 bg-slate-50 border-t border-slate-200 flex flex-col gap-2.5">
+        <div className="p-4 bg-paper border-t-2 border-ink flex flex-col gap-3">
           {saveError && (
-            <div className="text-[11px] text-rose-600 font-medium flex items-center gap-1">
+            <div className="text-[11px] font-mono text-red-600 font-bold flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5" />
               <span>{saveError}</span>
             </div>
           )}
 
           <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-slate-700 block">
+            <label className="font-mono text-[11px] font-bold uppercase text-ink block">
               Quality Reviewer Sign-off Notes / Justification:
             </label>
             <input
@@ -1438,15 +1449,15 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
               value={confirmationNotes}
               onChange={(e) => setConfirmationNotes(e.target.value)}
               placeholder="e.g., Reviewed against batch record API-2026-014; confirmed drying temperature profile deviation."
-              className="w-full text-xs px-2.5 py-1.5 border border-slate-300 rounded bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="input-brutal w-full text-xs"
             />
           </div>
 
-          <div className="flex items-center justify-between gap-3 pt-1 border-t border-slate-200">
-            <div className="text-[11px] text-slate-500 leading-tight">
+          <div className="flex items-center justify-between gap-3 pt-2 border-t border-subtle">
+            <div className="text-[11px] font-mono text-muted leading-tight">
               {currentAnalysis.is_confirmed_by_human ? (
-                <span className="text-emerald-700 font-semibold flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                <span className="text-teal font-bold flex items-center gap-1">
+                  <CheckCircle2 className="w-4 h-4" />
                   Confirmed by Quality Reviewer
                 </span>
               ) : (
@@ -1458,7 +1469,7 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
               type="button"
               onClick={handleSaveReview}
               disabled={saveLoading}
-              className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-600 text-white rounded-md text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors"
+              className="btn-brutal-primary text-xs py-2 px-4 flex items-center gap-2 bg-ink"
             >
               <Save className="w-3.5 h-3.5" />
               <span>{saveLoading ? 'Saving to DB...' : 'Save Review Decisions'}</span>
@@ -1469,29 +1480,31 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
 
       {/* Evidence Viewer Modal */}
       {evidenceModalDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200">
-            <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 backdrop-blur-xs p-4">
+          <div className="bg-paper border-3 border-ink shadow-brutal-lg max-w-lg w-full overflow-hidden">
+            <div className="p-3.5 bg-ink text-white flex items-center justify-between border-b-2 border-ink">
               <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-teal-400" />
-                <h4 className="text-xs font-bold text-white">{evidenceModalDoc.title}</h4>
+                <FileText className="w-4 h-4 text-lime" />
+                <h4 className="font-display text-xs font-bold uppercase tracking-wider text-white">
+                  {evidenceModalDoc.title}
+                </h4>
               </div>
               <button
                 type="button"
                 onClick={() => setEvidenceModalDoc(null)}
-                className="text-slate-400 hover:text-white"
+                className="text-gray-300 hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="p-4 max-h-[60vh] overflow-y-auto font-mono text-xs text-slate-700 bg-slate-50 whitespace-pre-wrap leading-relaxed">
+            <div className="p-4 max-h-[60vh] overflow-y-auto font-mono text-xs text-ink bg-white whitespace-pre-wrap leading-relaxed border-b-2 border-ink">
               {evidenceModalDoc.snippet}
             </div>
-            <div className="p-3 bg-white border-t border-slate-200 flex justify-end">
+            <div className="p-3 bg-paper flex justify-end">
               <button
                 type="button"
                 onClick={() => setEvidenceModalDoc(null)}
-                className="px-3 py-1.5 bg-slate-800 text-white rounded text-xs font-medium"
+                className="btn-brutal-secondary text-xs py-1.5 px-3"
               >
                 Close Evidence
               </button>
@@ -1502,53 +1515,55 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
 
       {/* Fact Review & Correction Modal */}
       {editingFact && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
-            <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 backdrop-blur-xs p-4">
+          <div className="bg-paper border-3 border-ink shadow-brutal-lg max-w-md w-full overflow-hidden">
+            <div className="p-3.5 bg-ink text-white flex items-center justify-between border-b-2 border-ink">
               <div className="flex items-center gap-2">
-                <FileCheck className="w-4 h-4 text-teal-400" />
-                <h4 className="text-xs font-bold text-white">Review & Verify Extracted Fact</h4>
+                <FileCheck className="w-4 h-4 text-lime" />
+                <h4 className="font-display text-xs font-bold uppercase tracking-wider text-white">
+                  Review & Verify Extracted Fact
+                </h4>
               </div>
               <button
                 type="button"
                 onClick={() => setEditingFact(null)}
-                className="text-slate-400 hover:text-white"
+                className="text-gray-300 hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="p-4 space-y-3 text-xs">
+            <div className="p-4 space-y-3 text-xs bg-white border-b-2 border-ink">
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">Target Field Name:</label>
-                <div className="p-2 bg-slate-100 rounded text-slate-800 font-mono text-[11px] capitalize">
+                <label className="font-mono text-[10px] font-bold uppercase text-muted block mb-1">Target Field Name:</label>
+                <div className="p-2 bg-paper border border-ink text-ink font-mono text-xs uppercase font-bold">
                   {editingFact.fieldName.replace(/_/g, ' ')}
                 </div>
               </div>
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">Extracted / Corrected Value:</label>
+                <label className="font-mono text-[10px] font-bold uppercase text-muted block mb-1">Extracted / Corrected Value:</label>
                 <input
                   type="text"
                   value={editingFact.currentValue}
                   onChange={(e) => setEditingFact({ ...editingFact, currentValue: e.target.value })}
-                  className="w-full text-xs px-2.5 py-1.5 border border-slate-300 rounded font-mono focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                  className="input-brutal w-full text-xs font-mono"
                 />
               </div>
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">Verification / Correction Notes:</label>
+                <label className="font-mono text-[10px] font-bold uppercase text-muted block mb-1">Verification / Correction Notes:</label>
                 <textarea
                   rows={2}
                   value={editingFact.notes}
                   onChange={(e) => setEditingFact({ ...editingFact, notes: e.target.value })}
                   placeholder="Reason for verification or correction..."
-                  className="w-full text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                  className="input-brutal w-full text-xs"
                 />
               </div>
             </div>
-            <div className="p-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+            <div className="p-3 bg-paper flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setEditingFact(null)}
-                className="px-3 py-1.5 border border-slate-300 rounded text-xs text-slate-700 font-medium hover:bg-slate-100"
+                className="btn-brutal-secondary text-xs py-1.5 px-3"
               >
                 Cancel
               </button>
@@ -1560,7 +1575,7 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                     handleAcceptFact(fact, editingFact.currentValue, editingFact.notes);
                   }
                 }}
-                className="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded text-xs font-semibold flex items-center gap-1"
+                className="btn-brutal-primary text-xs py-1.5 px-3 flex items-center gap-1.5 bg-teal"
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>Confirm & Apply to Record</span>
@@ -1572,38 +1587,40 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
 
       {/* Audit Log Payload Inspector Modal */}
       {inspectAuditLog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200">
-            <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 backdrop-blur-xs p-4">
+          <div className="bg-paper border-3 border-ink shadow-brutal-lg max-w-lg w-full overflow-hidden">
+            <div className="p-3.5 bg-ink text-white flex items-center justify-between border-b-2 border-ink">
               <div className="flex items-center gap-2">
-                <History className="w-4 h-4 text-teal-400" />
-                <h4 className="text-xs font-bold text-white">
+                <History className="w-4 h-4 text-lime" />
+                <h4 className="font-display text-xs font-bold uppercase tracking-wider text-white">
                   Audit Payload — {inspectAuditLog.event_type}
                 </h4>
               </div>
               <button
                 type="button"
                 onClick={() => setInspectAuditLog(null)}
-                className="text-slate-400 hover:text-white"
+                className="text-gray-300 hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="p-4 max-h-[60vh] overflow-y-auto font-mono text-[11px] text-slate-800 bg-slate-50 leading-relaxed">
-              <div className="mb-2 text-slate-500 font-sans text-xs">
-                <strong>Event ID:</strong> {inspectAuditLog.id} • <strong>Actor:</strong> {inspectAuditLog.actor_id} • <strong>Timestamp:</strong> {inspectAuditLog.created_at}
+            <div className="p-4 max-h-[60vh] overflow-y-auto font-mono text-xs text-ink bg-white leading-relaxed border-b-2 border-ink">
+              <div className="mb-3 text-muted text-[11px] border-b border-subtle pb-2">
+                <div><strong>Event ID:</strong> {inspectAuditLog.id}</div>
+                <div><strong>Actor:</strong> {inspectAuditLog.actor_id}</div>
+                <div><strong>Timestamp:</strong> {inspectAuditLog.created_at}</div>
               </div>
-              <pre className="p-2.5 bg-white border border-slate-200 rounded whitespace-pre-wrap">
+              <pre className="p-3 bg-paper border border-ink whitespace-pre-wrap text-[11px]">
                 {typeof inspectAuditLog.details === 'string'
                   ? inspectAuditLog.details
                   : JSON.stringify(inspectAuditLog.details, null, 2)}
               </pre>
             </div>
-            <div className="p-3 bg-white border-t border-slate-200 flex justify-end">
+            <div className="p-3 bg-paper flex justify-end">
               <button
                 type="button"
                 onClick={() => setInspectAuditLog(null)}
-                className="px-3 py-1.5 bg-slate-800 text-white rounded text-xs font-medium"
+                className="btn-brutal-secondary text-xs py-1.5 px-3"
               >
                 Close Inspector
               </button>
