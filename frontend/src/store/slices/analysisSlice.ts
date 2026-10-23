@@ -275,6 +275,22 @@ export const analysisSlice = createSlice({
         if (action.payload.priority !== undefined) capa.suggested_priority = action.payload.priority;
       }
     },
+    updateLocalEvidenceGap: (
+      state,
+      action: PayloadAction<{
+        gapId: string;
+        status?: 'open' | 'addressed' | 'resolved' | string;
+        description?: string;
+      }>
+    ) => {
+      const gapList = state.currentAnalysis?.structured_output?.evidence_gaps;
+      if (!gapList) return;
+      const gap = gapList.find((g) => g.gap_id === action.payload.gapId);
+      if (gap) {
+        if (action.payload.status !== undefined) gap.status = action.payload.status as any;
+        if (action.payload.description !== undefined) gap.description = action.payload.description;
+      }
+    },
   },
   extraReducers: (builder) => {
     // Health
@@ -403,6 +419,7 @@ export const {
   updateLocalCause,
   updateLocalFishboneCause,
   updateLocalCapa,
+  updateLocalEvidenceGap,
 } = analysisSlice.actions;
 
 export default analysisSlice.reducer;

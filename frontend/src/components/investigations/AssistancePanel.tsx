@@ -24,6 +24,12 @@ import {
   Award,
   AlertTriangle,
   ChevronDown,
+  History,
+  Clock,
+  Unlink,
+  FileCheck,
+  Lock,
+  ShieldAlert,
 } from 'lucide-react';
 import {
   Investigation,
@@ -50,9 +56,15 @@ import {
   removeLocalFiveWhysStep,
   updateLocalFishboneCause,
   updateLocalCapa,
+  updateLocalEvidenceGap,
   clearSaveStatus,
 } from '../../store/slices/analysisSlice';
-import { updateInvestigation } from '../../store/investigationsSlice';
+import {
+  updateInvestigation,
+  applyVerifiedFact,
+  fetchAuditLogs,
+} from '../../store/investigationsSlice';
+import { detachSourceThunk } from '../../store/sourcesSlice';
 
 interface AssistancePanelProps {
   investigation: Investigation | null;
@@ -77,8 +89,9 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
     saveSuccess,
     aiHealth,
   } = useAppSelector((state) => state.analysis);
+  const { auditLogs, auditLoading } = useAppSelector((state) => state.investigations);
 
-  const [activeTab, setActiveTab] = useState<'evidence' | 'causes' | 'fiveWhys' | 'fishbone' | 'capa'>('evidence');
+  const [activeTab, setActiveTab] = useState<'evidence' | 'causes' | 'fiveWhys' | 'fishbone' | 'capa' | 'history'>('evidence');
   const [showRunOptions, setShowRunOptions] = useState(false);
   const [evidenceModalDoc, setEvidenceModalDoc] = useState<{
     sourceId: string;
@@ -89,6 +102,15 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
   // Form fact update state
   const [acceptedFacts, setAcceptedFacts] = useState<Record<string, boolean>>({});
   const [rejectedFacts, setRejectedFacts] = useState<Record<string, boolean>>({});
+  const [editingFact, setEditingFact] = useState<{
+    fieldName: string;
+    originalValue: string;
+    currentValue: string;
+    notes: string;
+  } | null>(null);
+
+  // Audit event payload inspector modal
+  const [inspectAuditLog, setInspectAuditLog] = useState<any | null>(null);
 
   // Human confirmation notes state
   const [confirmationNotes, setConfirmationNotes] = useState('');
@@ -98,6 +120,7 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
     if (investigation?.id) {
       dispatch(fetchLatestAnalysis(investigation.id));
       dispatch(fetchAnalysisHistory(investigation.id));
+      dispatch(fetchAuditLogs(investigation.id));
     }
   }, [dispatch, investigation?.id]);
 
@@ -130,6 +153,7 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
       })
     );
     dispatch(fetchAnalysisHistory(investigation.id));
+    dispatch(fetchAuditLogs(investigation.id));
   };
 
   const handleRunTargeted = async (method: 'fiveWhys' | 'fishbone' | 'capa') => {
@@ -139,18 +163,25 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
     if (method === 'fishbone') await dispatch(executeFishbone(investigation.id));
     if (method === 'capa') await dispatch(executeCapa(investigation.id));
     dispatch(fetchAnalysisHistory(investigation.id));
+    dispatch(fetchAuditLogs(investigation.id));
   };
 
-  const handleAcceptFact = async (fact: ExtractedFact) => {
-    if (!investigation?.id) return;
+  const handleAcceptFact = async (fact: ExtractedFact, customValue?: string, notes?: string) => {
+    if (!investigation?.id || !currentAnalysis?.id) return;
+    const valToApply = customValue !== undefined ? customValue : fact.extracted_value;
     setAcceptedFacts((prev) => ({ ...prev, [fact.field_name]: true }));
-    // Update the investigation field directly in the backend and Redux
     await dispatch(
-      updateInvestigation({
-        idOrCode: investigation.id,
-        payload: { [fact.field_name]: fact.extracted_value },
+      applyVerifiedFact({
+        investigationId: investigation.id,
+        analysisId: currentAnalysis.id,
+        payload: {
+          field_name: fact.field_name,
+          extracted_value: valToApply,
+          verification_notes: notes || 'Verified and applied by investigator.',
+        },
       })
     );
+    setEditingFact(null);
   };
 
   const handleRejectFact = (fact: ExtractedFact) => {
@@ -189,6 +220,20 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
         payload,
       })
     );
+    dispatch(fetchAuditLogs(investigation.id));
+  };
+
+  const handleDetachSource = async (doc: SourceDocument) => {
+    if (!investigation?.id) return;
+    const docName = doc.original_filename || doc.source_id;
+    if (window.confirm(`Are you sure you want to detach source document "${docName}" from this investigation?`)) {
+      await dispatch(
+        detachSourceThunk({
+          sourceId: doc.id || doc.source_id,
+          investigationId: investigation.id,
+        })
+      );
+    }
   };
 
   const structured = currentAnalysis?.structured_output;
@@ -408,6 +453,23 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
         >
           CAPA
         </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('history')}
+          className={`flex-1 py-2.5 px-2 text-center font-medium border-b-2 whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 ${
+            activeTab === 'history'
+              ? 'border-teal-600 text-teal-700 bg-white font-semibold'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <History className="w-3.5 h-3.5" />
+          <span>Audit Trail</span>
+          {auditLogs.length > 0 && (
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700 font-mono font-semibold">
+              {auditLogs.length}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Tab Content Container */}
@@ -462,20 +524,31 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                         <span>
                           Status: <strong className="text-teal-700">{doc.extraction_status}</strong>
                         </span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setEvidenceModalDoc({
-                              sourceId: doc.source_id,
-                              snippet: doc.extracted_text || 'No text extracted.',
-                              title: doc.original_filename || doc.source_id,
-                            })
-                          }
-                          className="text-teal-600 hover:text-teal-800 inline-flex items-center gap-1 font-medium"
-                        >
-                          <Eye className="w-3 h-3" />
-                          <span>View Text</span>
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setEvidenceModalDoc({
+                                sourceId: doc.source_id,
+                                snippet: doc.extracted_text || 'No text extracted.',
+                                title: doc.original_filename || doc.source_id,
+                              })
+                            }
+                            className="text-teal-600 hover:text-teal-800 inline-flex items-center gap-1 font-medium"
+                          >
+                            <Eye className="w-3 h-3" />
+                            <span>View Text</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDetachSource(doc)}
+                            className="text-rose-600 hover:text-rose-800 inline-flex items-center gap-1 font-medium"
+                            title="Detach document from this investigation"
+                          >
+                            <Unlink className="w-3 h-3" />
+                            <span>Detach</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -531,7 +604,7 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                         <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
                           {isAccepted ? (
                             <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
-                              <Check className="w-3.5 h-3.5" /> Applied to Form
+                              <Check className="w-3.5 h-3.5" /> Applied to Record (Audited)
                             </span>
                           ) : isRejected ? (
                             <span className="text-[11px] text-slate-400 italic">Dismissed</span>
@@ -543,6 +616,21 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                                 className="px-2 py-1 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded text-[11px] font-medium"
                               >
                                 Reject
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setEditingFact({
+                                    fieldName: fact.field_name,
+                                    originalValue: fact.extracted_value,
+                                    currentValue: fact.extracted_value,
+                                    notes: 'Verified and applied by investigator.',
+                                  })
+                                }
+                                className="px-2 py-1 text-teal-700 hover:bg-teal-50 border border-teal-300 rounded text-[11px] font-medium flex items-center gap-1"
+                              >
+                                <Edit3 className="w-3 h-3" />
+                                <span>Edit & Apply</span>
                               </button>
                               <button
                                 type="button"
@@ -590,15 +678,17 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                           </span>
                           {gap.category}
                         </span>
-                        <span
-                          className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase ${
-                            gap.priority === 'High'
-                              ? 'bg-rose-100 text-rose-700 border border-rose-300'
-                              : 'bg-amber-100 text-amber-800'
-                          }`}
-                        >
-                          {gap.priority} Priority
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase ${
+                              gap.priority === 'High'
+                                ? 'bg-rose-100 text-rose-700 border border-rose-300'
+                                : 'bg-amber-100 text-amber-800'
+                            }`}
+                          >
+                            {gap.priority} Priority
+                          </span>
+                        </div>
                       </div>
                       <p className="text-slate-700 leading-snug">{gap.description}</p>
                       <div className="text-[11px] text-slate-500">
@@ -607,6 +697,34 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                       </div>
                       <div className="text-[10px] text-slate-400 italic">
                         Why it matters: {gap.why_it_matters}
+                      </div>
+
+                      {/* Investigator Gap Review Status */}
+                      <div className="flex items-center justify-between pt-1.5 border-t border-amber-200/60">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] text-amber-950 font-semibold">Review Status:</span>
+                          <select
+                            value={gap.status || 'open'}
+                            onChange={(e) =>
+                              dispatch(
+                                updateLocalEvidenceGap({
+                                  gapId: gap.gap_id,
+                                  status: e.target.value,
+                                })
+                              )
+                            }
+                            className="text-[10px] border border-amber-300 rounded px-1.5 py-0.5 bg-white font-medium text-amber-950 focus:outline-none"
+                          >
+                            <option value="open">Open (Unresolved)</option>
+                            <option value="addressed">Addressed in Investigation</option>
+                            <option value="resolved">Resolved (Evidence Acquired)</option>
+                          </select>
+                        </div>
+                        {gap.status === 'resolved' && (
+                          <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-0.5">
+                            <CheckCircle2 className="w-3 h-3" /> Resolved
+                          </span>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -675,27 +793,76 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                           <h5 className="font-bold text-slate-900 mt-1.5 text-xs">{cause.title}</h5>
                         </div>
 
-                        {/* Confirmation Radio or Action */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedConfirmedCauseId(cause.cause_id);
-                            dispatch(
-                              updateLocalCause({
-                                causeId: cause.cause_id,
-                                isConfirmed: true,
-                              })
-                            );
-                          }}
-                          className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors flex items-center gap-1 ${
-                            causeConfirmed
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-slate-100 hover:bg-teal-50 text-slate-700 hover:text-teal-800 border border-slate-200'
-                          }`}
-                        >
-                          <Award className="w-3.5 h-3.5" />
-                          <span>{causeConfirmed ? 'Confirmed' : 'Select Root Cause'}</span>
-                        </button>
+                        {/* Human Review Decision Buttons */}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedConfirmedCauseId(cause.cause_id);
+                              dispatch(
+                                updateLocalCause({
+                                  causeId: cause.cause_id,
+                                  isConfirmed: true,
+                                  reviewStatus: 'confirmed',
+                                })
+                              );
+                            }}
+                            className={`px-2 py-1 rounded text-[10px] font-semibold transition-colors flex items-center gap-1 ${
+                              causeConfirmed
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300'
+                            }`}
+                          >
+                            <Award className="w-3 h-3" />
+                            <span>{causeConfirmed ? 'Confirmed' : 'Accept Cause'}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (selectedConfirmedCauseId === cause.cause_id) {
+                                setSelectedConfirmedCauseId(null);
+                              }
+                              dispatch(
+                                updateLocalCause({
+                                  causeId: cause.cause_id,
+                                  isConfirmed: false,
+                                  reviewStatus: 'needs_evidence',
+                                })
+                              );
+                            }}
+                            className={`px-2 py-1 rounded text-[10px] font-semibold transition-colors ${
+                              cause.review_status === 'needs_evidence'
+                                ? 'bg-amber-600 text-white'
+                                : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-300'
+                            }`}
+                          >
+                            <span>Needs Evidence</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (selectedConfirmedCauseId === cause.cause_id) {
+                                setSelectedConfirmedCauseId(null);
+                              }
+                              dispatch(
+                                updateLocalCause({
+                                  causeId: cause.cause_id,
+                                  isConfirmed: false,
+                                  reviewStatus: 'rejected',
+                                })
+                              );
+                            }}
+                            className={`px-2 py-1 rounded text-[10px] font-semibold transition-colors ${
+                              cause.review_status === 'rejected'
+                                ? 'bg-rose-600 text-white'
+                                : 'bg-rose-50 text-rose-800 hover:bg-rose-100 border border-rose-300'
+                            }`}
+                          >
+                            <span>Reject</span>
+                          </button>
+                        </div>
                       </div>
 
                       <p className="text-slate-700 leading-relaxed text-[11px]">{cause.explanation}</p>
@@ -1107,11 +1274,154 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
             )}
           </div>
         )}
+
+        {/* TAB 6: Audit Trail & Historical Versions */}
+        {activeTab === 'history' && (
+          <div className="space-y-4">
+            {/* Regulatory Compliance / Audit Trail Explanation */}
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-slate-800 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-teal-600" />
+                  Audit Trail & Compliance History
+                </h4>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-teal-100 text-teal-800 font-semibold">
+                  {auditLogs.length} Events Logged
+                </span>
+              </div>
+              <p className="text-slate-600 text-[11px]">
+                Immutable, append-only record of all investigation updates, source attachments/detachments, LangGraph AI executions, and human quality review sign-offs.
+              </p>
+            </div>
+
+            {/* Analysis Versions Card */}
+            {history && history.length > 0 && (
+              <div className="border border-slate-200 rounded-lg p-3 bg-white space-y-2">
+                <h5 className="text-xs font-bold text-slate-800 flex items-center justify-between">
+                  <span>Intelligence Version History ({history.length})</span>
+                  <span className="text-[10px] text-slate-400">Preserved execution snapshots</span>
+                </h5>
+                <div className="space-y-1.5">
+                  {history.map((ver) => (
+                    <div
+                      key={ver.id}
+                      className={`p-2 rounded border text-xs flex items-center justify-between transition-colors ${
+                        ver.id === currentAnalysis?.id
+                          ? 'border-teal-500 bg-teal-50/50 ring-1 ring-teal-400'
+                          : 'border-slate-200 bg-slate-50/60'
+                      }`}
+                    >
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 bg-slate-200 text-slate-800 font-bold rounded">
+                            v{ver.version}
+                          </span>
+                          <span className="font-semibold text-slate-900">
+                            {ver.model_identifier || 'Groq Engine'}
+                          </span>
+                          {ver.id === currentAnalysis?.id && (
+                            <span className="text-[9px] uppercase tracking-wide bg-teal-600 text-white px-1.5 py-0.2 rounded font-bold">
+                              Current
+                            </span>
+                          )}
+                          {ver.is_confirmed_by_human && (
+                            <span className="text-[9px] uppercase tracking-wide bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-semibold flex items-center gap-0.5">
+                              <Check className="w-2.5 h-2.5" /> QA Confirmed
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[10px] text-slate-500 flex items-center gap-2">
+                          <span>Created: {new Date(ver.created_at).toLocaleString()}</span>
+                          {ver.confirmed_root_cause && (
+                            <span>• Cause: <strong className="text-slate-700 truncate max-w-[180px] inline-block align-bottom">{ver.confirmed_root_cause}</strong></span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Audit Trail Events Timeline */}
+            <div className="border border-slate-200 rounded-lg p-3 bg-white space-y-2">
+              <h5 className="text-xs font-bold text-slate-800 flex items-center justify-between">
+                <span>Append-Only Chronological Log</span>
+                <span className="text-[10px] text-slate-400">UTC Timestamps</span>
+              </h5>
+
+              {auditLoading ? (
+                <div className="py-6 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
+                  <RotateCw className="w-3.5 h-3.5 animate-spin text-teal-600" />
+                  <span>Loading audit records...</span>
+                </div>
+              ) : auditLogs.length === 0 ? (
+                <div className="py-6 text-center text-xs text-slate-400 italic">
+                  No audit trail events recorded yet.
+                </div>
+              ) : (
+                <div className="space-y-2 divide-y divide-slate-100">
+                  {auditLogs.map((log) => {
+                    const eventColors: Record<string, string> = {
+                      investigation_created: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                      status_transitioned: 'bg-indigo-100 text-indigo-800 border-indigo-300',
+                      reopened: 'bg-amber-100 text-amber-900 border-amber-300',
+                      source_attached: 'bg-teal-100 text-teal-800 border-teal-300',
+                      source_detached: 'bg-rose-100 text-rose-800 border-rose-300',
+                      analysis_started: 'bg-blue-100 text-blue-800 border-blue-300',
+                      analysis_completed: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                      analysis_failed: 'bg-rose-100 text-rose-900 border-rose-300',
+                      root_cause_confirmed: 'bg-purple-100 text-purple-900 border-purple-300',
+                      fact_applied: 'bg-teal-100 text-teal-800 border-teal-300',
+                      analysis_reviewed: 'bg-teal-100 text-teal-900 border-teal-300',
+                    };
+                    const colorClass = eventColors[log.event_type] || 'bg-slate-100 text-slate-800 border-slate-300';
+
+                    return (
+                      <div key={log.id} className="pt-2 text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border uppercase font-bold ${colorClass}`}>
+                              {log.event_type.replace(/_/g, ' ')}
+                            </span>
+                            <span className="text-[11px] font-semibold text-slate-800">
+                              Actor: <code className="text-teal-700 bg-slate-50 px-1 py-0.2 rounded border border-slate-200">{log.actor_id}</code>
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-slate-400 font-mono">
+                            {new Date(log.created_at).toISOString().replace('T', ' ').substring(0, 19)} UTC
+                          </span>
+                        </div>
+
+                        <p className="text-slate-700 text-[11px] leading-snug">
+                          {log.summary || `Action performed on ${log.entity_type}`}
+                        </p>
+
+                        {log.details && (
+                          <div className="flex items-center justify-end">
+                            <button
+                              type="button"
+                              onClick={() => setInspectAuditLog(log)}
+                              className="text-[10px] text-teal-600 hover:text-teal-800 font-medium inline-flex items-center gap-0.5"
+                            >
+                              <span>Inspect Payload</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Review Confirmation & Persistence Footer */}
       {currentAnalysis && (
-        <div className="p-3.5 bg-slate-50 border-t border-slate-200 flex flex-col gap-2">
+        <div className="p-3.5 bg-slate-50 border-t border-slate-200 flex flex-col gap-2.5">
           {saveError && (
             <div className="text-[11px] text-rose-600 font-medium flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5" />
@@ -1119,7 +1429,20 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
             </div>
           )}
 
-          <div className="flex items-center justify-between gap-3">
+          <div className="space-y-1">
+            <label className="text-[11px] font-semibold text-slate-700 block">
+              Quality Reviewer Sign-off Notes / Justification:
+            </label>
+            <input
+              type="text"
+              value={confirmationNotes}
+              onChange={(e) => setConfirmationNotes(e.target.value)}
+              placeholder="e.g., Reviewed against batch record API-2026-014; confirmed drying temperature profile deviation."
+              className="w-full text-xs px-2.5 py-1.5 border border-slate-300 rounded bg-white text-slate-900 focus:outline-none focus:ring-1 focus:ring-teal-500"
+            />
+          </div>
+
+          <div className="flex items-center justify-between gap-3 pt-1 border-t border-slate-200">
             <div className="text-[11px] text-slate-500 leading-tight">
               {currentAnalysis.is_confirmed_by_human ? (
                 <span className="text-emerald-700 font-semibold flex items-center gap-1">
@@ -1171,6 +1494,118 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                 className="px-3 py-1.5 bg-slate-800 text-white rounded text-xs font-medium"
               >
                 Close Evidence
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Fact Review & Correction Modal */}
+      {editingFact && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
+            <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileCheck className="w-4 h-4 text-teal-400" />
+                <h4 className="text-xs font-bold text-white">Review & Verify Extracted Fact</h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingFact(null)}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-4 space-y-3 text-xs">
+              <div>
+                <label className="font-semibold text-slate-700 block mb-1">Target Field Name:</label>
+                <div className="p-2 bg-slate-100 rounded text-slate-800 font-mono text-[11px] capitalize">
+                  {editingFact.fieldName.replace(/_/g, ' ')}
+                </div>
+              </div>
+              <div>
+                <label className="font-semibold text-slate-700 block mb-1">Extracted / Corrected Value:</label>
+                <input
+                  type="text"
+                  value={editingFact.currentValue}
+                  onChange={(e) => setEditingFact({ ...editingFact, currentValue: e.target.value })}
+                  className="w-full text-xs px-2.5 py-1.5 border border-slate-300 rounded font-mono focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="font-semibold text-slate-700 block mb-1">Verification / Correction Notes:</label>
+                <textarea
+                  rows={2}
+                  value={editingFact.notes}
+                  onChange={(e) => setEditingFact({ ...editingFact, notes: e.target.value })}
+                  placeholder="Reason for verification or correction..."
+                  className="w-full text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                />
+              </div>
+            </div>
+            <div className="p-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setEditingFact(null)}
+                className="px-3 py-1.5 border border-slate-300 rounded text-xs text-slate-700 font-medium hover:bg-slate-100"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const fact = structured?.extracted_facts?.find((f) => f.field_name === editingFact.fieldName);
+                  if (fact) {
+                    handleAcceptFact(fact, editingFact.currentValue, editingFact.notes);
+                  }
+                }}
+                className="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded text-xs font-semibold flex items-center gap-1"
+              >
+                <Check className="w-3.5 h-3.5" />
+                <span>Confirm & Apply to Record</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Audit Log Payload Inspector Modal */}
+      {inspectAuditLog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200">
+            <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <History className="w-4 h-4 text-teal-400" />
+                <h4 className="text-xs font-bold text-white">
+                  Audit Payload — {inspectAuditLog.event_type}
+                </h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setInspectAuditLog(null)}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-4 max-h-[60vh] overflow-y-auto font-mono text-[11px] text-slate-800 bg-slate-50 leading-relaxed">
+              <div className="mb-2 text-slate-500 font-sans text-xs">
+                <strong>Event ID:</strong> {inspectAuditLog.id} • <strong>Actor:</strong> {inspectAuditLog.actor_id} • <strong>Timestamp:</strong> {inspectAuditLog.created_at}
+              </div>
+              <pre className="p-2.5 bg-white border border-slate-200 rounded whitespace-pre-wrap">
+                {typeof inspectAuditLog.details === 'string'
+                  ? inspectAuditLog.details
+                  : JSON.stringify(inspectAuditLog.details, null, 2)}
+              </pre>
+            </div>
+            <div className="p-3 bg-white border-t border-slate-200 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setInspectAuditLog(null)}
+                className="px-3 py-1.5 bg-slate-800 text-white rounded text-xs font-medium"
+              >
+                Close Inspector
               </button>
             </div>
           </div>

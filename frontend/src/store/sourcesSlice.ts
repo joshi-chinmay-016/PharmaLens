@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { SourceDocument } from '../types';
 import { api } from '../services/api';
-import { fetchInvestigationById } from './investigationsSlice';
+import { fetchInvestigationById, fetchAuditLogs } from './investigationsSlice';
 
 interface SourcesState {
   activeSource: SourceDocument | null;
@@ -67,6 +67,25 @@ export const uploadPdfThunk = createAsyncThunk(
       return doc;
     } catch (err: any) {
       return rejectWithValue(err.message || 'PDF upload or text extraction failed');
+    }
+  }
+);
+
+export const detachSourceThunk = createAsyncThunk(
+  'sources/detachSource',
+  async (
+    { sourceId, investigationId }: { sourceId: string | number; investigationId?: number },
+    { dispatch, rejectWithValue }
+  ) => {
+    try {
+      const res = await api.detachSource(sourceId);
+      if (investigationId) {
+        dispatch(fetchInvestigationById(investigationId));
+        dispatch(fetchAuditLogs(investigationId));
+      }
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err.message || 'Failed to detach source document');
     }
   }
 );

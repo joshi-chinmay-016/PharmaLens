@@ -55,7 +55,7 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Metrics Cards Grid (from actual DB records) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
           <div className="flex items-center justify-between text-slate-500 mb-2">
             <span className="text-xs font-semibold uppercase tracking-wider">Total Records</span>
@@ -69,7 +69,7 @@ export const DashboardPage: React.FC = () => {
 
         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
           <div className="flex items-center justify-between text-amber-600 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider">Draft Records</span>
+            <span className="text-xs font-semibold uppercase tracking-wider">Draft</span>
             <FileText className="w-4 h-4 text-amber-500" />
           </div>
           <div className="text-2xl font-bold text-slate-900">
@@ -87,6 +87,17 @@ export const DashboardPage: React.FC = () => {
             {metrics?.in_review_investigations ?? 0}
           </div>
           <p className="text-[11px] text-slate-400 mt-1">Under QA investigation</p>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
+          <div className="flex items-center justify-between text-emerald-600 mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider">Completed</span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+          </div>
+          <div className="text-2xl font-bold text-slate-900">
+            {metrics?.completed_investigations ?? 0}
+          </div>
+          <p className="text-[11px] text-slate-400 mt-1">Sealed & signed-off records</p>
         </div>
 
         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">

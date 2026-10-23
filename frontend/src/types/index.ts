@@ -1,4 +1,4 @@
-export type InvestigationStatus = 'Draft' | 'In Review' | 'Completed' | 'Closed';
+export type InvestigationStatus = 'Draft' | 'Under Investigation' | 'AI Analysis Available' | 'In Review' | 'Completed' | string;
 
 export interface SourceDocument {
   id: number;
@@ -116,12 +116,43 @@ export interface InvestigationUpdatePayload {
   has_unresolved_gaps?: boolean;
 }
 
+export interface InvestigationAuditLog {
+  id: number;
+  investigation_id: number;
+  event_type: string;
+  actor: string;
+  entity_type: string | null;
+  entity_id: string | null;
+  action_summary: string;
+  details_json: string | null;
+  created_at: string;
+}
+
+export interface TransitionPayload {
+  target_status: string;
+  justification?: string;
+}
+
+export interface ReopenPayload {
+  reason: string;
+  target_status?: string;
+}
+
+export interface ApplyFactPayload {
+  field_name: string;
+  new_value: any;
+  reason?: string;
+  source_id?: string;
+}
+
 export interface DashboardMetrics {
   total_investigations: number;
   draft_investigations: number;
   in_review_investigations: number;
   unresolved_gaps_count: number;
   completed_investigations: number;
+  under_investigation_count?: number;
+  ai_available_count?: number;
 }
 
 export interface HealthResponse {

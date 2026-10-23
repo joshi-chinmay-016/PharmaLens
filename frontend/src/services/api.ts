@@ -6,6 +6,10 @@ import {
   DashboardMetrics,
   SourceDocument,
   HealthResponse,
+  InvestigationAuditLog,
+  TransitionPayload,
+  ReopenPayload,
+  ApplyFactPayload,
 } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -223,5 +227,59 @@ export const api = {
       body: JSON.stringify(payload),
     });
     return handleResponse<import('../types').AnalysisResponse>(res);
+  },
+
+  // Retrieve Chronological Audit Trail
+  async getAuditLogs(idOrCode: string | number): Promise<InvestigationAuditLog[]> {
+    const res = await fetch(`${API_BASE}/investigations/${idOrCode}/audit-logs`);
+    return handleResponse<InvestigationAuditLog[]>(res);
+  },
+
+  // Transition Lifecycle State
+  async transitionInvestigation(
+    idOrCode: string | number,
+    payload: TransitionPayload
+  ): Promise<Investigation> {
+    const res = await fetch(`${API_BASE}/investigations/${idOrCode}/transition`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return handleResponse<Investigation>(res);
+  },
+
+  // Reopen Completed Investigation
+  async reopenInvestigation(
+    idOrCode: string | number,
+    payload: ReopenPayload
+  ): Promise<Investigation> {
+    const res = await fetch(`${API_BASE}/investigations/${idOrCode}/reopen`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return handleResponse<Investigation>(res);
+  },
+
+  // Apply Fact to Investigation Record
+  async applyFact(
+    investigationId: number,
+    analysisId: number,
+    payload: ApplyFactPayload
+  ): Promise<{ status: string; message: string; field_name: string; new_value: any }> {
+    const res = await fetch(`${API_BASE}/investigations/${investigationId}/analysis/${analysisId}/apply-fact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return handleResponse<{ status: string; message: string; field_name: string; new_value: any }>(res);
+  },
+
+  // Detach Source Document from Investigation
+  async detachSource(sourceIdOrPk: string | number, investigationId: number): Promise<SourceDocument> {
+    const res = await fetch(`${API_BASE}/sources/${sourceIdOrPk}/detach?investigation_id=${investigationId}`, {
+      method: 'PATCH',
+    });
+    return handleResponse<SourceDocument>(res);
   },
 };

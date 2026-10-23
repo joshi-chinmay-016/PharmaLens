@@ -20,6 +20,7 @@ interface InvestigationFormProps {
   saveError: string | null;
   onOpenSourceIntake: () => void;
   pendingSourceDoc: SourceDocument | null;
+  isCompleted?: boolean;
 }
 
 export const InvestigationForm: React.FC<InvestigationFormProps> = ({
@@ -30,7 +31,9 @@ export const InvestigationForm: React.FC<InvestigationFormProps> = ({
   saveError,
   onOpenSourceIntake,
   pendingSourceDoc,
+  isCompleted: propIsCompleted,
 }) => {
+  const isCompleted = propIsCompleted || initialData?.status === 'Completed';
   const [formData, setFormData] = useState({
     title: '',
     incident_reference: '',
@@ -193,14 +196,26 @@ export const InvestigationForm: React.FC<InvestigationFormProps> = ({
             </button>
             <button
               type="submit"
-              disabled={isSaving}
+              disabled={isSaving || isCompleted}
               className="inline-flex items-center gap-1.5 text-xs text-white bg-teal-600 hover:bg-teal-700 disabled:opacity-50 px-4 py-1.5 rounded-md font-semibold shadow-sm transition-colors"
             >
               <Save className="w-3.5 h-3.5" />
-              {isSaving ? 'Saving...' : initialData ? 'Update Record' : 'Save Investigation'}
+              {isSaving ? 'Saving...' : isCompleted ? 'Record Sealed (Completed)' : initialData ? 'Update Record' : 'Save Investigation'}
             </button>
           </div>
         </div>
+
+        {/* Completed status banner */}
+        {isCompleted && (
+          <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs rounded-lg flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <span>
+                <strong>Investigation Completed & Sealed:</strong> Direct form edits are locked per GxP record integrity. To modify, use the <em>Reopen Investigation</em> action above.
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Feedback banners */}
         {validationError && (

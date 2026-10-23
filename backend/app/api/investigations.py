@@ -8,8 +8,12 @@ from app.schemas.investigation import (
     InvestigationResponse,
     InvestigationSummary,
     DashboardMetricsResponse,
+    InvestigationTransitionRequest,
+    InvestigationReopenRequest,
 )
+from app.schemas.audit_log import InvestigationAuditLogResponse
 from app.services.investigation_service import InvestigationService
+from app.services.audit_service import AuditLogService
 
 router = APIRouter(prefix="/investigations", tags=["Investigations"])
 
@@ -71,8 +75,47 @@ def update_investigation(
     payload: InvestigationUpdate,
     db: Session = Depends(get_db)
 ):
-    """Update editable investigation fields."""
+    """Update editable investigation fields with audit logging and completion locks."""
     return InvestigationService.update_investigation(db, id_or_code, payload)
+
+@router.post("/{id_or_code}/transition", response_model=InvestigationResponse)
+def transition_investigation_status(
+    id_or_code: str,
+    payload: InvestigationTransitionRequest,
+    db: Session = Depends(get_db)
+):
+    """Explicitly transition workflow state with completion validation and audit logging."""
+    return InvestigationService.transition_investigation(
+        db=db,
+        id_or_code=id_or_code,
+        target_status=payload.target_status,
+        justification=payload.justification,
+    )
+
+@router.post("/{id_or_code}/reopen", response_model=InvestigationResponse)
+def reopen_investigation(
+    id_or_code: str,
+    payload: InvestigationReopenRequest,
+    db: Session = Depends(get_db)
+):
+    """Reopen a completed investigation with mandatory regulatory/quality justification."""
+    return InvestigationService.reopen_investigation(
+        db=db,
+        id_or_code=id_or_code,
+        reason=payload.reason,
+        target_status=payload.target_status or "In Review",
+    )
+
+@router.get("/{id_or_code}/audit-logs", response_model=List[InvestigationAuditLogResponse])
+def get_investigation_audit_logs(
+    id_or_code: str,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=200),
+    db: Session = Depends(get_db)
+):
+    """Retrieve append-only chronological audit trail for the investigation."""
+    inv = InvestigationService.get_investigation_by_id(db, id_or_code)
+    return AuditLogService.get_audit_logs(db, investigation_id=inv.id, skip=skip, limit=limit)
 
 @router.delete("/{id_or_code}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_investigation(

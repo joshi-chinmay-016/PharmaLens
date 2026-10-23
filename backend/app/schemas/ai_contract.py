@@ -157,3 +157,21 @@ class AIHealthResponse(BaseModel):
     temperature: float
     max_tokens: int
     supported_methods: List[str] = ["fact_extraction", "evidence_gaps", "potential_causes", "five_whys", "fishbone_6m", "capa_recommendations"]
+
+class ApplyFactRequest(BaseModel):
+    field_name: str = Field(..., description="Target investigation field name to update, e.g. 'batch_number'")
+    new_value: Optional[Any] = Field(None, description="Extracted or corrected fact value")
+    extracted_value: Optional[Any] = Field(None, description="Extracted fact value alias")
+    reason: Optional[str] = Field(None, description="Investigator rationale for applying/correcting fact")
+    verification_notes: Optional[str] = Field(None, description="Investigator verification notes alias")
+    source_id: Optional[str] = Field(None, description="Source document ID for provenance traceability")
+
+    @property
+    def resolved_value(self) -> Any:
+        return self.new_value if self.new_value is not None else self.extracted_value
+
+    @property
+    def resolved_reason(self) -> Optional[str]:
+        return self.reason or self.verification_notes
+
+

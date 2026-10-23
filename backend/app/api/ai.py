@@ -11,6 +11,7 @@ from app.schemas.ai_contract import (
     RunAnalysisRequest,
     AnalysisUpdateRequest,
     AIHealthResponse,
+    ApplyFactRequest,
 )
 
 router = APIRouter(tags=["AI Intelligence"])
@@ -118,3 +119,30 @@ def update_analysis_human_review(
         update_data=payload,
     )
     return AnalysisPersistenceService.to_response_dto(updated)
+
+# Apply Verified Fact to Investigation Record
+@router.post("/investigations/{investigation_id}/analysis/{analysis_id}/apply-fact")
+def apply_verified_fact(
+    investigation_id: int,
+    analysis_id: int,
+    payload: ApplyFactRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Applies an extracted or corrected fact directly to the investigation record.
+    Preserves audit trail with old/new values, rationale, and source document reference.
+    """
+    inv = AnalysisPersistenceService.apply_fact_to_investigation(
+        db=db,
+        investigation_id=investigation_id,
+        field_name=payload.field_name,
+        new_value=payload.resolved_value,
+        reason=payload.resolved_reason,
+        source_id=payload.source_id,
+    )
+    return {
+        "status": "success",
+        "message": f"Field '{payload.field_name}' updated successfully on investigation {inv.investigation_id}",
+        "field_name": payload.field_name,
+        "new_value": payload.resolved_value,
+    }

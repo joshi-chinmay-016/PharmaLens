@@ -54,3 +54,10 @@ class Investigation(Base):
         cascade="all, delete-orphan",
         lazy="selectin"
     )
+    audit_logs = relationship(
+        "InvestigationAuditLog",
+        back_populates="investigation",
+        cascade="all, delete-orphan",
+        order_by="desc(InvestigationAuditLog.created_at)",
+        lazy="selectin"
+    )

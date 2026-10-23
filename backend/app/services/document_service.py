@@ -46,6 +46,22 @@ class DocumentService:
             investigation_id=investigation_id,
         )
         db.add(doc)
+        db.flush()
+
+        if investigation_id:
+            from app.services.audit_service import AuditLogService
+            AuditLogService.log_event(
+                db=db,
+                investigation_id=investigation_id,
+                event_type="source_attached",
+                actor="QA Lead Investigator",
+                entity_type="source_document",
+                entity_id=doc.source_id,
+                action_summary=f"Pasted text source attached ({doc.source_id})",
+                details={"source_type": doc.source_type, "source_id": doc.source_id},
+                commit=False,
+            )
+
         db.commit()
         db.refresh(doc)
         return doc
@@ -95,6 +111,22 @@ class DocumentService:
             investigation_id=investigation_id,
         )
         db.add(doc)
+        db.flush()
+
+        if investigation_id:
+            from app.services.audit_service import AuditLogService
+            AuditLogService.log_event(
+                db=db,
+                investigation_id=investigation_id,
+                event_type="source_attached",
+                actor="QA Lead Investigator",
+                entity_type="source_document",
+                entity_id=doc.source_id,
+                action_summary=f"Incident email source attached ({doc.source_id}): '{subject[:40]}'",
+                details={"source_type": doc.source_type, "source_id": doc.source_id, "subject": subject},
+                commit=False,
+            )
+
         db.commit()
         db.refresh(doc)
         return doc
@@ -164,6 +196,28 @@ class DocumentService:
             investigation_id=investigation_id,
         )
         db.add(doc)
+        db.flush()
+
+        if investigation_id:
+            from app.services.audit_service import AuditLogService
+            AuditLogService.log_event(
+                db=db,
+                investigation_id=investigation_id,
+                event_type="source_attached",
+                actor="QA Lead Investigator",
+                entity_type="source_document",
+                entity_id=doc.source_id,
+                action_summary=f"PDF document attached ({doc.source_id}): '{file.filename}'",
+                details={
+                    "source_type": doc.source_type,
+                    "source_id": doc.source_id,
+                    "filename": file.filename,
+                    "pages": page_count,
+                    "extraction_status": status,
+                },
+                commit=False,
+            )
+
         db.commit()
         db.refresh(doc)
         return doc

@@ -3,6 +3,7 @@ from typing import Dict, Any, Optional
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
+from app.core.config import settings
 from app.models.investigation import Investigation
 from app.models.source_document import SourceDocument
 from app.ai.state import InvestigationGraphState
@@ -129,13 +130,41 @@ class AIOrchestrator:
 
         # 6. Execute LangGraph workflow
         logger.info("Executing LangGraph investigation workflow for ID %s...", investigation_id)
+        from app.services.audit_service import AuditLogService
+
         try:
             final_state = investigation_graph.invoke(initial_state)
         except Exception as e:
-            logger.error("LangGraph execution failure: %s", str(e))
+            error_cls = type(e).__name__
+            error_msg = str(e)
+            logger.error("LangGraph execution failure (%s): %s", error_cls, error_msg)
+
+            # Classify error safely for client
+            user_safe_message = "AI analysis workflow encountered an error during reasoning execution."
+            if "rate limit" in error_msg.lower() or "429" in error_msg:
+                user_safe_message = "Groq AI rate limit exceeded. Please retry in a few moments."
+            elif "timeout" in error_msg.lower():
+                user_safe_message = "AI model inference timed out. Please retry with a shorter context or selected RCA method."
+            elif "authentication" in error_msg.lower() or "401" in error_msg or "api key" in error_msg.lower():
+                user_safe_message = "AI provider authentication failed. Check GROQ_API_KEY configuration."
+            elif "validation" in error_msg.lower():
+                user_safe_message = "Structured reasoning validation failed against the pharmaceutical RCA contract."
+
+            # Append audit event for failed execution without exposing secrets or stack traces
+            AuditLogService.log_event(
+                db=db,
+                investigation_id=inv.id,
+                event_type="analysis_failed",
+                actor="System AI Engine",
+                entity_type="investigation_analysis",
+                action_summary=f"AI analysis execution failed: {user_safe_message}",
+                details={"error_class": error_cls, "summary": user_safe_message},
+                commit=True,
+            )
+
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"LangGraph execution encountered an error: {str(e)}"
+                detail=user_safe_message
             )
 
         # 7. Construct validated Pydantic output contract
@@ -163,13 +192,81 @@ class AIOrchestrator:
         elif req.include_fishbone and not req.include_five_whys:
             methods_label = "fishbone"
 
+        # Check if graph execution failed due to provider errors across nodes
+        exec_status = final_state.get("execution_status", "completed")
+        if exec_status == "failed":
+            failed_list = final_state.get("failed_nodes", [])
+            warnings_list = final_state.get("analysis_warnings", [])
+            warnings_text = " ".join(warnings_list).lower()
+
+            detail_msg = "AI reasoning engine failed to complete analysis due to provider inference errors across multiple nodes."
+            if "rate limit" in warnings_text or "429" in warnings_text:
+                detail_msg = "Groq AI rate limit reached. Please retry in a few moments."
+            elif "timeout" in warnings_text:
+                detail_msg = "AI model inference timed out. Please retry with selected RCA methods."
+            elif "auth" in warnings_text or "key" in warnings_text:
+                detail_msg = "AI provider authentication failed. Check GROQ_API_KEY configuration."
+
+            AuditLogService.log_event(
+                db=db,
+                investigation_id=inv.id,
+                event_type="analysis_failed",
+                actor="System AI Engine",
+                entity_type="investigation_analysis",
+                action_summary=f"AI reasoning workflow failed: {detail_msg}",
+                details={"failed_nodes": failed_list, "summary": detail_msg},
+                commit=True,
+            )
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=detail_msg
+            )
+
         # 8. Persist versioned analysis record
         saved_record = AnalysisPersistenceService.save_analysis(
             db=db,
             investigation_id=inv.id,
             contract=contract,
             requested_methods=methods_label,
-            status=final_state.get("execution_status", "completed"),
+            status=exec_status,
+        )
+
+        # 9. Transition status to 'AI Analysis Available' if currently in Draft or Under Investigation
+        if inv.status in ("Draft", "Under Investigation"):
+            old_status = inv.status
+            inv.status = "AI Analysis Available"
+            AuditLogService.log_event(
+                db=db,
+                investigation_id=inv.id,
+                event_type="investigation_status_changed",
+                actor="System AI Engine",
+                entity_type="investigation",
+                entity_id=inv.investigation_id,
+                action_summary=f"Investigation status automatically updated from '{old_status}' to 'AI Analysis Available'",
+                details={"previous_status": old_status, "new_status": "AI Analysis Available"},
+                commit=False,
+            )
+            db.commit()
+            db.refresh(inv)
+
+        # 10. Audit log for analysis completion
+        AuditLogService.log_event(
+            db=db,
+            investigation_id=inv.id,
+            event_type="analysis_completed",
+            actor="System AI Engine",
+            entity_type="investigation_analysis",
+            entity_id=str(saved_record.id),
+            action_summary=f"AI analysis completed successfully (Version {saved_record.version}, methods: {methods_label})",
+            details={
+                "version": saved_record.version,
+                "model": settings.GROQ_MODEL,
+                "methods": methods_label,
+                "facts_count": len(contract.extracted_facts),
+                "causes_count": len(contract.potential_root_causes),
+                "capa_count": len(contract.capa_recommendations),
+            },
+            commit=True,
         )
 
         return AnalysisPersistenceService.to_response_dto(saved_record)

@@ -88,9 +88,19 @@ class InvestigationResponse(InvestigationBase):
 
     model_config = ConfigDict(from_attributes=True)
 
+class InvestigationTransitionRequest(BaseModel):
+    target_status: str = Field(..., description="Target status: Draft, Under Investigation, AI Analysis Available, In Review, Completed")
+    justification: Optional[str] = Field(None, description="Optional justification or notes for the transition")
+
+class InvestigationReopenRequest(BaseModel):
+    reason: str = Field(..., min_length=5, description="Mandatory regulatory/quality justification for reopening a completed investigation")
+    target_status: Optional[str] = Field("In Review", description="Status to transition to upon reopening (default: In Review)")
+
 class DashboardMetricsResponse(BaseModel):
     total_investigations: int
     draft_investigations: int
     in_review_investigations: int
     unresolved_gaps_count: int
     completed_investigations: int
+    under_investigation_count: Optional[int] = 0
+    ai_available_count: Optional[int] = 0
