@@ -23,35 +23,119 @@
 }
 
 @layer components {
-  /* Tactical Neo-Brutalist Buttons */
+  /* =====================================================
+     TACTICAL NEO-BRUTALIST BUTTON SYSTEM
+     Clear 5-tier visual hierarchy with always-visible text
+     ===================================================== */
+
+  /* PRIMARY — Teal: main CTA, save, create actions */
   .btn-brutal-primary {
-    @apply inline-flex items-center justify-center gap-2 font-display font-bold text-xs uppercase tracking-wider bg-teal-primary text-white border-2 border-ink px-4 py-2.5 shadow-brutal transition-all duration-150 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal-lg hover:bg-teal-deep active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none;
+    @apply inline-flex items-center justify-center gap-2 font-display font-black text-xs uppercase tracking-wider
+           bg-teal-primary text-white border-2 border-ink px-4 py-2.5
+           shadow-brutal transition-all duration-150
+           hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal-lg hover:bg-teal-deep
+           active:translate-x-0.5 active:translate-y-0.5 active:shadow-none active:bg-teal-deep
+           disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-brutal-xs;
   }
 
+  /* LIME — Lime/green: "run AI", "start review", high-energy confirm actions */
   .btn-brutal-lime {
-    @apply inline-flex items-center justify-center gap-2 font-display font-bold text-xs uppercase tracking-wider bg-lime-accent text-ink border-2 border-ink px-4 py-2.5 shadow-brutal transition-all duration-150 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal-lg hover:bg-lime-hover active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none;
+    @apply inline-flex items-center justify-center gap-2 font-display font-black text-xs uppercase tracking-wider
+           bg-lime-accent text-ink border-2 border-ink px-4 py-2.5
+           shadow-brutal transition-all duration-150
+           hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal-lg hover:bg-lime-hover
+           active:translate-x-0.5 active:translate-y-0.5 active:shadow-none active:bg-lime-hover
+           disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-brutal-xs;
   }
 
+  /* SECONDARY — White/paper: standard utility, navigation buttons */
   .btn-brutal-secondary {
-    @apply inline-flex items-center justify-center gap-2 font-display font-bold text-xs uppercase tracking-wider bg-white text-ink border-2 border-ink px-4 py-2.5 shadow-brutal transition-all duration-150 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal-lg hover:bg-paper active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none;
+    @apply inline-flex items-center justify-center gap-2 font-display font-bold text-xs uppercase tracking-wider
+           bg-white text-ink border-2 border-ink px-4 py-2.5
+           shadow-brutal-sm transition-all duration-150
+           hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal hover:bg-paper
+           active:translate-x-0.5 active:translate-y-0.5 active:shadow-none active:bg-subtle
+           disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none;
   }
 
+  /* GHOST — Transparent: subtle/tertiary actions, icon-only buttons */
+  .btn-brutal-ghost {
+    @apply inline-flex items-center justify-center gap-2 font-display font-bold text-xs uppercase tracking-wider
+           bg-transparent text-ink border-2 border-ink/40 px-4 py-2.5
+           transition-all duration-150
+           hover:bg-paper hover:border-ink hover:shadow-brutal-xs
+           active:bg-subtle active:shadow-none
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  /* DANGER — Rose/red: destructive actions, errors */
   .btn-brutal-danger {
-    @apply inline-flex items-center justify-center gap-2 font-display font-bold text-xs uppercase tracking-wider bg-rose-600 text-white border-2 border-ink px-4 py-2.5 shadow-brutal transition-all duration-150 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal-lg hover:bg-rose-700 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none;
+    @apply inline-flex items-center justify-center gap-2 font-display font-black text-xs uppercase tracking-wider
+           bg-rose-600 text-white border-2 border-ink px-4 py-2.5
+           shadow-brutal transition-all duration-150
+           hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal-lg hover:bg-rose-700
+           active:translate-x-0.5 active:translate-y-0.5 active:shadow-none
+           disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none;
   }
 
-  /* Neo-Brutalist Cards */
+  /* ACTIVE/TOGGLED state — Ink black: used when a toggle button IS active/on */
+  .btn-brutal-active {
+    @apply inline-flex items-center justify-center gap-2 font-display font-black text-xs uppercase tracking-wider
+           bg-ink text-white border-2 border-ink px-4 py-2.5
+           shadow-brutal transition-all duration-150
+           hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal-lg hover:bg-ink/90
+           active:translate-x-0.5 active:translate-y-0.5 active:shadow-none
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  /* =====================================================
+     STAGE STEPPER TABS — active vs inactive
+     ===================================================== */
+  .stage-tab-inactive {
+    @apply p-2.5 text-left border-2 border-ink bg-white text-ink transition-all duration-150
+           hover:bg-teal-light hover:border-teal-primary hover:-translate-y-0.5 hover:shadow-brutal-xs
+           cursor-pointer;
+  }
+
+  .stage-tab-active {
+    @apply p-2.5 text-left border-2 border-teal-primary bg-teal-primary text-white transition-all duration-150
+           -translate-y-0.5 shadow-brutal cursor-pointer;
+  }
+
+  /* =====================================================
+     AI PANEL SUB-TABS — inline tab switchers
+     ===================================================== */
+  .panel-tab-inactive {
+    @apply px-3 py-2 font-display font-bold text-[10px] uppercase tracking-wider
+           border-b-2 border-transparent text-muted transition-all duration-150
+           hover:text-ink hover:border-ink/40 cursor-pointer;
+  }
+
+  .panel-tab-active {
+    @apply px-3 py-2 font-display font-bold text-[10px] uppercase tracking-wider
+           border-b-2 border-teal-primary text-teal-primary transition-all duration-150
+           cursor-pointer;
+  }
+
+  /* =====================================================
+     NEO-BRUTALIST CARDS
+     ===================================================== */
   .card-brutal {
     @apply bg-white border-2 border-ink shadow-brutal transition-all;
   }
 
   .card-brutal-interactive {
-    @apply bg-white border-2 border-ink shadow-brutal transition-all duration-150 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal-lg cursor-pointer;
+    @apply bg-white border-2 border-ink shadow-brutal transition-all duration-150
+           hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal-lg cursor-pointer;
   }
 
-  /* Form Inputs */
+  /* =====================================================
+     FORM INPUTS
+     ===================================================== */
   .input-brutal {
-    @apply border-2 border-ink bg-white px-3 py-2 text-xs font-sans text-ink shadow-brutal-xs focus:shadow-brutal focus:outline-none focus:bg-white placeholder:text-muted;
+    @apply border-2 border-ink bg-white px-3 py-2 text-xs font-sans text-ink
+           shadow-brutal-xs focus:shadow-brutal focus:outline-none focus:bg-white
+           placeholder:text-muted;
   }
 }
 

@@ -54,8 +54,9 @@ export const fetchLatestAnalysis = createAsyncThunk(
     try {
       return await api.getLatestAnalysis(investigationId);
     } catch (err: any) {
-      // 404 is normal if analysis has not been run yet
-      if (err.message && err.message.includes('404')) {
+      // 404 or missing analysis is normal if analysis has not been executed yet
+      const msg = err.message ? err.message.toLowerCase() : '';
+      if (msg.includes('404') || msg.includes('no ai analysis') || msg.includes('not found')) {
         return null;
       }
       return rejectWithValue(err.message || 'Failed to retrieve analysis');

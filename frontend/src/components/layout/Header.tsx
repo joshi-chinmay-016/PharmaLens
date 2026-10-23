@@ -61,8 +61,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
 
       <div className="flex items-center gap-2 sm:gap-3">
         {/* Compliance / Environment Badge */}
-        <div className="hidden lg:flex items-center gap-2 bg-[#F0FDFA] border-2 border-ink text-ink px-2.5 py-1 text-[10px] font-mono font-bold uppercase shadow-brutal-xs">
-          <Shield className="w-3.5 h-3.5 text-teal" />
+        <div className="hidden lg:flex items-center gap-2 bg-teal-primary border-2 border-ink text-white px-2.5 py-1 text-[10px] font-mono font-bold uppercase shadow-brutal-xs">
+          <Shield className="w-3.5 h-3.5 text-lime-accent" />
           <span>Active GMP QA Environment</span>
         </div>
 
@@ -75,10 +75,10 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
         {/* Home / Landing link */}
         <Link
           to="/"
-          className="hidden sm:inline-flex items-center gap-1.5 border-2 border-ink bg-paper hover:bg-white text-ink px-2.5 py-1.5 text-xs font-mono font-bold shadow-brutal-xs hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all"
+          className="hidden sm:inline-flex items-center gap-1.5 border-2 border-slate-400 bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 text-xs font-mono font-bold shadow-[2px_2px_0px_#64748B] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#64748B] transition-all"
           title="Return to Product Landing Page"
         >
-          <Home className="w-3.5 h-3.5 text-teal" />
+          <Home className="w-3.5 h-3.5" />
           <span>Product Home</span>
         </Link>
 

@@ -204,8 +204,11 @@ export const api = {
   },
 
   // Retrieve Latest Saved Analysis
-  async getLatestAnalysis(investigationId: number): Promise<import('../types').AnalysisResponse> {
+  async getLatestAnalysis(investigationId: number): Promise<import('../types').AnalysisResponse | null> {
     const res = await fetch(`${API_BASE}/investigations/${investigationId}/analysis`);
+    if (res.status === 404) {
+      return null;
+    }
     return handleResponse<import('../types').AnalysisResponse>(res);
   },
 

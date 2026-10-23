@@ -67,16 +67,28 @@ import {
 } from '../../store/investigationsSlice';
 import { detachSourceThunk } from '../../store/sourcesSlice';
 
-interface AssistancePanelProps {
+export interface AssistancePanelProps {
   investigation: Investigation | null;
   onOpenSourceIntake: () => void;
   attachedSources: SourceDocument[];
+  mode?: 'drawer' | 'stage' | 'embedded';
+  activeTab?: 'evidence' | 'causes' | 'fiveWhys' | 'fishbone' | 'capa' | 'history';
+  onTabChange?: (tab: 'evidence' | 'causes' | 'fiveWhys' | 'fishbone' | 'capa' | 'history') => void;
+  isDrawerOpen?: boolean;
+  onCloseDrawer?: () => void;
+  onSavePrompt?: () => void;
 }
 
 export const AssistancePanel: React.FC<AssistancePanelProps> = ({
   investigation,
   onOpenSourceIntake,
   attachedSources,
+  mode = 'embedded',
+  activeTab: propActiveTab,
+  onTabChange,
+  isDrawerOpen = false,
+  onCloseDrawer,
+  onSavePrompt,
 }) => {
   const dispatch = useAppDispatch();
   const {
@@ -92,7 +104,12 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
   } = useAppSelector((state) => state.analysis);
   const { auditLogs, auditLoading } = useAppSelector((state) => state.investigations);
 
-  const [activeTab, setActiveTab] = useState<'evidence' | 'causes' | 'fiveWhys' | 'fishbone' | 'capa' | 'history'>('evidence');
+  const [internalTab, setInternalTab] = useState<'evidence' | 'causes' | 'fiveWhys' | 'fishbone' | 'capa' | 'history'>('evidence');
+  const activeTab = propActiveTab || internalTab;
+  const setActiveTab = (tab: 'evidence' | 'causes' | 'fiveWhys' | 'fishbone' | 'capa' | 'history') => {
+    setInternalTab(tab);
+    if (onTabChange) onTabChange(tab);
+  };
   const [showRunOptions, setShowRunOptions] = useState(false);
   const [evidenceModalDoc, setEvidenceModalDoc] = useState<{
     sourceId: string;
@@ -240,7 +257,7 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
   const structured = currentAnalysis?.structured_output;
   const isConfirmed = currentAnalysis?.is_confirmed_by_human;
 
-  return (
+  const panelContent = (
     <div className="bg-white border-2 border-ink shadow-brutal flex flex-col h-full overflow-hidden">
       {/* Panel Header */}
       <div className="p-4 bg-ink text-white border-b-2 border-ink">
@@ -266,73 +283,88 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
             </div>
           </div>
 
-          {/* Run Analysis Action Button with Dropdown */}
-          <div className="relative">
-            <div className="inline-flex shadow-[3px_3px_0px_#000]">
-              <button
-                type="button"
-                onClick={handleRunFullAnalysis}
-                disabled={loading || !hasTextContent}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-lime hover:bg-white text-ink text-xs font-mono font-bold uppercase border-2 border-ink transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                title={!hasTextContent ? 'Provide incident description or attach sources first' : 'Run full AI analysis'}
-              >
-                {loading ? (
-                  <RotateCw className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                )}
-                <span>{loading ? 'Analyzing...' : 'Run Analysis'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowRunOptions(!showRunOptions)}
-                disabled={loading || !hasTextContent}
-                className="px-2 bg-ink hover:bg-teal text-white border-2 border-l-0 border-ink transition-colors disabled:opacity-50"
-                aria-label="Analysis options"
-              >
-                <ChevronDown className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* Run Options Dropdown Menu */}
-            {showRunOptions && (
-              <div className="absolute right-0 mt-2 w-72 bg-paper border-2 border-ink shadow-brutal z-30 py-1 text-xs text-ink font-mono">
-                <div className="px-3 py-1.5 text-[10px] uppercase font-bold text-muted border-b border-subtle">
-                  Targeted Execution Scope
-                </div>
+          {/* Header Action Controls */}
+          <div className="flex items-center gap-2">
+            {/* Run Analysis Action Button with Dropdown */}
+            <div className="relative">
+              <div className="inline-flex shadow-[3px_3px_0px_#000]">
                 <button
                   type="button"
                   onClick={handleRunFullAnalysis}
-                  className="w-full text-left px-3 py-2.5 hover:bg-lime/30 flex items-center justify-between border-b border-subtle/50"
+                  disabled={loading || !hasTextContent || !investigation?.id}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-lime hover:bg-white text-ink text-xs font-mono font-bold uppercase border-2 border-ink transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={!investigation?.id ? 'Save the investigation first to run AI analysis' : !hasTextContent ? 'Provide incident description or attach sources first' : 'Run full AI analysis'}
                 >
-                  <span className="font-bold text-teal">Full Intelligence (All 4 Nodes)</span>
-                  <Sparkles className="w-3.5 h-3.5 text-teal" />
+                  {loading ? (
+                    <RotateCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                  )}
+                  <span>{loading ? 'Analyzing...' : 'Run Analysis'}</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleRunTargeted('fiveWhys')}
-                  className="w-full text-left px-3 py-2 hover:bg-white flex items-center justify-between"
+                  onClick={() => setShowRunOptions(!showRunOptions)}
+                  disabled={loading || !hasTextContent || !investigation?.id}
+                  className="px-2 bg-ink hover:bg-teal text-white border-2 border-l-0 border-ink transition-colors disabled:opacity-50"
+                  aria-label="Analysis options"
                 >
-                  <span>5 Whys Chain Only</span>
-                  <GitBranch className="w-3.5 h-3.5 text-muted" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleRunTargeted('fishbone')}
-                  className="w-full text-left px-3 py-2 hover:bg-white flex items-center justify-between"
-                >
-                  <span>Fishbone (6M Matrix) Only</span>
-                  <Network className="w-3.5 h-3.5 text-muted" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleRunTargeted('capa')}
-                  className="w-full text-left px-3 py-2 hover:bg-white flex items-center justify-between"
-                >
-                  <span>CAPA Recommendations Only</span>
-                  <ShieldCheck className="w-3.5 h-3.5 text-muted" />
+                  <ChevronDown className="w-3.5 h-3.5" />
                 </button>
               </div>
+
+              {/* Run Options Dropdown Menu */}
+              {showRunOptions && (
+                <div className="absolute right-0 mt-2 w-72 bg-paper border-2 border-ink shadow-brutal z-30 py-1 text-xs text-ink font-mono">
+                  <div className="px-3 py-1.5 text-[10px] uppercase font-bold text-muted border-b border-subtle">
+                    Targeted Execution Scope
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRunFullAnalysis}
+                    className="w-full text-left px-3 py-2.5 hover:bg-lime/30 flex items-center justify-between border-b border-subtle/50"
+                  >
+                    <span className="font-bold text-teal">Full Intelligence (All 4 Nodes)</span>
+                    <Sparkles className="w-3.5 h-3.5 text-teal" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRunTargeted('fiveWhys')}
+                    className="w-full text-left px-3 py-2 hover:bg-white flex items-center justify-between"
+                  >
+                    <span>5 Whys Chain Only</span>
+                    <GitBranch className="w-3.5 h-3.5 text-muted" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRunTargeted('fishbone')}
+                    className="w-full text-left px-3 py-2 hover:bg-white flex items-center justify-between"
+                  >
+                    <span>Fishbone (6M Matrix) Only</span>
+                    <Network className="w-3.5 h-3.5 text-muted" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRunTargeted('capa')}
+                    className="w-full text-left px-3 py-2 hover:bg-white flex items-center justify-between"
+                  >
+                    <span>CAPA Recommendations Only</span>
+                    <ShieldCheck className="w-3.5 h-3.5 text-muted" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {mode === 'drawer' && onCloseDrawer && (
+              <button
+                type="button"
+                onClick={onCloseDrawer}
+                className="p-1.5 text-white hover:text-lime hover:bg-white/10 border border-white/20 transition-colors ml-1 shadow-brutal-xs"
+                title="Close AI Intelligence Drawer"
+                aria-label="Close Intelligence Drawer"
+              >
+                <X className="w-4 h-4" />
+              </button>
             )}
           </div>
         </div>
@@ -357,8 +389,8 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
         </div>
       )}
 
-      {/* Error Banner */}
-      {error && (
+      {/* Error Banner - only show genuine errors, never missing analysis / 404 */}
+      {error && !error.toLowerCase().includes('no ai analysis') && !error.includes('404') && (
         <div className="p-3 bg-[#FEE2E2] border-b-2 border-ink flex items-start gap-2 text-xs font-mono text-ink font-semibold">
           <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
@@ -401,84 +433,177 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
         </div>
       )}
 
-      {/* Navigation Tabs */}
-      <div className="flex border-b-2 border-ink bg-paper text-xs font-mono font-bold overflow-x-auto">
-        <button
-          type="button"
-          onClick={() => setActiveTab('evidence')}
-          className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors border-r-2 border-ink ${
-            activeTab === 'evidence'
-              ? 'bg-ink text-lime'
-              : 'bg-paper text-muted hover:text-ink hover:bg-white'
-          }`}
-        >
-          Evidence & Gaps
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('causes')}
-          className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors border-r-2 border-ink ${
-            activeTab === 'causes'
-              ? 'bg-ink text-lime'
-              : 'bg-paper text-muted hover:text-ink hover:bg-white'
-          }`}
-        >
-          Potential Causes
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('fiveWhys')}
-          className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors border-r-2 border-ink ${
-            activeTab === 'fiveWhys'
-              ? 'bg-ink text-lime'
-              : 'bg-paper text-muted hover:text-ink hover:bg-white'
-          }`}
-        >
-          5 Whys
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('fishbone')}
-          className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors border-r-2 border-ink ${
-            activeTab === 'fishbone'
-              ? 'bg-ink text-lime'
-              : 'bg-paper text-muted hover:text-ink hover:bg-white'
-          }`}
-        >
-          Fishbone (6M)
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('capa')}
-          className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors border-r-2 border-ink ${
-            activeTab === 'capa'
-              ? 'bg-ink text-lime'
-              : 'bg-paper text-muted hover:text-ink hover:bg-white'
-          }`}
-        >
-          CAPA
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('history')}
-          className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 ${
-            activeTab === 'history'
-              ? 'bg-ink text-lime'
-              : 'bg-paper text-muted hover:text-ink hover:bg-white'
-          }`}
-        >
-          <History className="w-3.5 h-3.5" />
-          <span>Audit Trail</span>
-          {auditLogs.length > 0 && (
-            <span className="text-[10px] px-1.5 py-0.2 bg-white text-ink border border-ink font-mono font-bold">
-              {auditLogs.length}
-            </span>
-          )}
-        </button>
-      </div>
+      {/* Navigation Tabs - Show full strip in drawer/embedded, or segmented for Stage 3 RCA */}
+      {mode === 'drawer' || mode === 'embedded' ? (
+        <div className="flex border-b-2 border-ink bg-paper text-xs font-mono font-bold overflow-x-auto scrollbar-thin">
+          <button
+            type="button"
+            onClick={() => setActiveTab('evidence')}
+            className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors border-r-2 border-ink ${
+              activeTab === 'evidence'
+                ? 'bg-teal-primary text-white font-black'
+                : 'bg-paper text-muted hover:text-ink hover:bg-white'
+            }`}
+          >
+            Evidence &amp; Gaps
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('causes')}
+            className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors border-r-2 border-ink ${
+              activeTab === 'causes'
+                ? 'bg-teal-primary text-white font-black'
+                : 'bg-paper text-muted hover:text-ink hover:bg-white'
+            }`}
+          >
+            Potential Causes
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('fiveWhys')}
+            className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors border-r-2 border-ink ${
+              activeTab === 'fiveWhys'
+                ? 'bg-teal-primary text-white font-black'
+                : 'bg-paper text-muted hover:text-ink hover:bg-white'
+            }`}
+          >
+            5 Whys
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('fishbone')}
+            className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors border-r-2 border-ink ${
+              activeTab === 'fishbone'
+                ? 'bg-teal-primary text-white font-black'
+                : 'bg-paper text-muted hover:text-ink hover:bg-white'
+            }`}
+          >
+            Fishbone (6M)
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('capa')}
+            className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors border-r-2 border-ink ${
+              activeTab === 'capa'
+                ? 'bg-teal-primary text-white font-black'
+                : 'bg-paper text-muted hover:text-ink hover:bg-white'
+            }`}
+          >
+            CAPA
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('history')}
+            className={`flex-1 py-2.5 px-3 text-center whitespace-nowrap transition-colors flex items-center justify-center gap-1.5 ${
+              activeTab === 'history'
+                ? 'bg-teal-primary text-white font-black'
+                : 'bg-paper text-muted hover:text-ink hover:bg-white'
+            }`}
+          >
+            <History className="w-3.5 h-3.5" />
+            <span>Audit Trail</span>
+            {auditLogs.length > 0 && (
+              <span className={`text-[10px] px-1.5 py-0.5 border font-mono font-bold ${
+                activeTab === 'history' ? 'bg-white text-ink border-white/40' : 'bg-white text-ink border-ink'
+              }`}>
+                {auditLogs.length}
+              </span>
+            )}
+          </button>
+        </div>
+      ) : (activeTab === 'causes' || activeTab === 'fiveWhys' || activeTab === 'fishbone') ? (
+        <div className="flex border-b-2 border-ink bg-paper p-1.5 gap-1.5 font-mono text-xs font-bold">
+          <button
+            type="button"
+            onClick={() => setActiveTab('causes')}
+            className={`flex-1 py-2 px-3 text-center border-2 border-ink transition-all ${
+              activeTab === 'causes'
+                ? 'bg-teal-primary text-white shadow-brutal-xs -translate-y-0.5'
+                : 'bg-white text-ink hover:bg-teal-light'
+            }`}
+          >
+            1. Candidate Causes ({structured?.potential_root_causes?.length || 0})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('fiveWhys')}
+            className={`flex-1 py-2 px-3 text-center border-2 border-ink transition-all ${
+              activeTab === 'fiveWhys'
+                ? 'bg-teal-primary text-white shadow-brutal-xs -translate-y-0.5'
+                : 'bg-white text-ink hover:bg-teal-light'
+            }`}
+          >
+            2. 5 Whys Sequence
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('fishbone')}
+            className={`flex-1 py-2 px-3 text-center border-2 border-ink transition-all ${
+              activeTab === 'fishbone'
+                ? 'bg-teal-primary text-white shadow-brutal-xs -translate-y-0.5'
+                : 'bg-white text-ink hover:bg-teal-light'
+            }`}
+          >
+            3. Fishbone (6M Matrix)
+          </button>
+        </div>
+      ) : null}
 
       {/* Tab Content Container */}
       <div className="p-4 flex-1 overflow-y-auto space-y-4 bg-paper">
+        {/* Informative Empty State for Missing Analysis (NEVER an error) */}
+        {!currentAnalysis && !loading && activeTab !== 'history' && activeTab !== 'evidence' && (
+          <div className="p-8 text-center bg-white border-2 border-ink shadow-brutal space-y-4 my-2">
+            <div className="w-12 h-12 bg-lime border-2 border-ink shadow-brutal-xs flex items-center justify-center mx-auto text-ink">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <div className="space-y-1">
+              <h4 className="font-display font-bold text-base text-ink uppercase tracking-wider">
+                {!investigation?.id ? 'New Investigation Workspace' : 'No AI Analysis Executed Yet'}
+              </h4>
+              <p className="text-xs font-mono text-muted max-w-md mx-auto">
+                {!investigation?.id
+                  ? 'Add incident details and attach a source document to prepare for analysis. Save the investigation first to run AI Root Cause Analysis and CAPA recommendations.'
+                  : 'Add incident details and attach a source document to prepare for analysis. Then click "Run Analysis" to generate causal hypotheses, 5 Whys, Fishbone, and CAPA recommendations.'}
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-3 pt-2 flex-wrap">
+              <button
+                type="button"
+                onClick={onOpenSourceIntake}
+                className="inline-flex items-center justify-center gap-1.5 font-display font-bold text-xs uppercase tracking-wider
+                           bg-amber-400 text-amber-950 border-2 border-ink px-3.5 py-2
+                           shadow-brutal-sm transition-all duration-150
+                           hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-brutal
+                           active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>Attach Source Document</span>
+              </button>
+              {investigation?.id ? (
+                <button
+                  type="button"
+                  onClick={handleRunFullAnalysis}
+                  disabled={loading || !hasTextContent}
+                  className="btn-brutal-primary text-xs px-4 py-2 inline-flex items-center gap-2 shadow-brutal"
+                >
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <span>Run Investigation Analysis</span>
+                </button>
+              ) : onSavePrompt ? (
+                <button
+                  type="button"
+                  onClick={onSavePrompt}
+                  className="btn-brutal-primary text-xs px-4 py-2 inline-flex items-center gap-1.5 shadow-brutal"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Save Investigation</span>
+                </button>
+              ) : null}
+            </div>
+          </div>
+        )}
+
         {/* TAB 1: Evidence & Gaps */}
         {activeTab === 'evidence' && (
           <div className="space-y-4">
@@ -492,7 +617,11 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                 <button
                   type="button"
                   onClick={onOpenSourceIntake}
-                  className="btn-brutal-secondary text-[11px] py-1 px-2.5"
+                  className="inline-flex items-center justify-center gap-1 font-display font-bold text-[11px] uppercase tracking-wider
+                             bg-amber-400 text-amber-950 border-2 border-ink py-1 px-2.5
+                             shadow-[2px_2px_0px_#171717] transition-all duration-150
+                             hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-amber-300
+                             active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
                 >
                   + Add Source
                 </button>
@@ -505,7 +634,8 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                   <button
                     type="button"
                     onClick={onOpenSourceIntake}
-                    className="mt-2 text-xs font-mono font-bold text-teal hover:underline uppercase"
+                    className="mt-2 inline-flex items-center gap-1 text-xs font-display font-bold uppercase tracking-wider
+                               text-amber-700 border-b-2 border-amber-400 hover:border-amber-600 hover:text-amber-900 transition-colors"
                   >
                     Upload PDF or Paste Incident Text →
                   </button>
@@ -539,7 +669,11 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                                 title: doc.original_filename || doc.source_id,
                               })
                             }
-                            className="btn-brutal-secondary text-[10px] py-1 px-2 flex items-center gap-1"
+                            className="inline-flex items-center gap-1 font-display font-bold text-[10px] uppercase tracking-wider
+                                       bg-slate-100 text-slate-700 border-2 border-slate-400 py-1 px-2
+                                       shadow-[1px_1px_0px_#64748B] transition-all duration-150
+                                       hover:bg-slate-200 hover:-translate-x-0.5 hover:-translate-y-0.5
+                                       active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
                           >
                             <Eye className="w-3 h-3" />
                             <span>View Text</span>
@@ -620,7 +754,11 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                               <button
                                 type="button"
                                 onClick={() => handleRejectFact(fact)}
-                                className="btn-brutal-secondary text-[10px] py-1 px-2"
+                                className="inline-flex items-center gap-1 font-display font-bold text-[10px] uppercase tracking-wider
+                                           bg-rose-100 text-rose-800 border-2 border-rose-400 py-1 px-2
+                                           shadow-[1px_1px_0px_#F43F5E] transition-all duration-150
+                                           hover:bg-rose-200 hover:-translate-x-0.5 hover:-translate-y-0.5
+                                           active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
                               >
                                 Reject
                               </button>
@@ -1630,4 +1768,28 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
       )}
     </div>
   );
+
+  if (mode === 'drawer') {
+    return (
+      <>
+        {isDrawerOpen && (
+          <div
+            onClick={onCloseDrawer}
+            className="fixed inset-0 z-40 bg-ink/60 backdrop-blur-xs transition-opacity"
+            aria-hidden="true"
+          />
+        )}
+        <aside
+          className={`fixed inset-y-0 right-0 z-50 w-full sm:w-[520px] md:w-[580px] bg-white border-l-2 border-ink shadow-brutal-xl flex flex-col transition-transform duration-200 ease-in-out ${
+            isDrawerOpen ? 'translate-x-0' : 'translate-x-full pointer-events-none'
+          }`}
+          aria-label="Investigation Intelligence Drawer"
+        >
+          {panelContent}
+        </aside>
+      </>
+    );
+  }
+
+  return panelContent;
 };
