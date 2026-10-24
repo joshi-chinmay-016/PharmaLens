@@ -28,6 +28,7 @@ def evidence_gaps_node(state: InvestigationGraphState) -> Dict[str, Any]:
         response_json = GroqClientManager.generate_chat_json(
             system_prompt=EVIDENCE_GAPS_SYSTEM_PROMPT,
             user_prompt=user_prompt,
+            max_tokens=200,
         )
         llm_missing = response_json.get("missing_fields", [])
         for mf in llm_missing:

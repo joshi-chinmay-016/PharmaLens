@@ -31,6 +31,7 @@ def potential_causes_node(state: InvestigationGraphState) -> Dict[str, Any]:
         response_json = GroqClientManager.generate_chat_json(
             system_prompt=POTENTIAL_CAUSES_SYSTEM_PROMPT,
             user_prompt=user_prompt,
+            max_tokens=240,
         )
         potential_root_causes = response_json.get("potential_root_causes", [])
         contributing_factors = response_json.get("contributing_factors", [])

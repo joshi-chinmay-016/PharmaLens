@@ -12,6 +12,7 @@ CRITICAL QUALITY & SAFETY DIRECTIVES:
 3. HYPOTHESES VS. CONFIRMED CAUSES: Every proposed cause is an UNCONFIRMED HYPOTHESIS until confirmed by a qualified human investigator. Never declare a root cause as definitively proven.
 4. HONEST UNCERTAINTY: If information is missing from the submitted records, explicitly state that it was not provided in the supplied sources. Distinguish "missing from supplied records" from "does not exist in reality".
 5. OUTPUT FORMAT: You must output strictly valid JSON conforming exactly to the requested schema. Do not include markdown code block formatting or commentary outside the JSON.
+6. CONCISENESS & LIMITS: Be extremely concise. Maximum 2 items per array. Use short, single-sentence descriptions. Keep every string under 15 words. Total output MUST NOT exceed 200 tokens.
 """
 
 FACT_EXTRACTION_SYSTEM_PROMPT = SAFETY_PREAMBLE + """

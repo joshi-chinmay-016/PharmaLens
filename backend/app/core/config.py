@@ -28,11 +28,11 @@ class Settings(BaseSettings):
     
     # Groq API (Phase 2 AI Integration)
     GROQ_API_KEY: Optional[str] = None
-    GROQ_MODEL: str = "openai/gpt-oss-120b"
-    GROQ_TIMEOUT_SECONDS: int = 60
+    GROQ_MODEL: str = "qwen/qwen3.8-27b"
+    GROQ_TIMEOUT_SECONDS: int = 90
     GROQ_MAX_RETRIES: int = 2
     AI_MAX_SOURCE_CHARS: int = 40000
-    AI_MAX_OUTPUT_TOKENS: int = 5000
+    AI_MAX_OUTPUT_TOKENS: int = 260
     AI_TEMPERATURE: float = 0.0
     
     model_config = {

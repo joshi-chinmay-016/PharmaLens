@@ -33,6 +33,7 @@ def capa_node(state: InvestigationGraphState) -> Dict[str, Any]:
         response_json = GroqClientManager.generate_chat_json(
             system_prompt=CAPA_SYSTEM_PROMPT,
             user_prompt=user_prompt,
+            max_tokens=220,
         )
         capa_recommendations = response_json.get("capa_recommendations", [])
 

@@ -935,6 +935,13 @@ export const InvestigationWorkspacePage: React.FC = () => {
               />
             </div>
 
+            {lifecycleError && (
+              <div className="p-2.5 bg-rose-50 border-2 border-rose-600 text-rose-900 text-xs font-mono font-bold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-700 shrink-0" />
+                <span>{lifecycleError}</span>
+              </div>
+            )}
+
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 type="button"

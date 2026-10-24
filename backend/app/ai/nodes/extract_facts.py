@@ -26,6 +26,7 @@ def extract_facts_node(state: InvestigationGraphState) -> Dict[str, Any]:
         response_json = GroqClientManager.generate_chat_json(
             system_prompt=FACT_EXTRACTION_SYSTEM_PROMPT,
             user_prompt=user_prompt,
+            max_tokens=200,
         )
         raw_facts = response_json.get("extracted_facts", [])
         missing_fields = response_json.get("missing_fields", [])

@@ -29,6 +29,7 @@ def fishbone_node(state: InvestigationGraphState) -> Dict[str, Any]:
         response_json = GroqClientManager.generate_chat_json(
             system_prompt=FISHBONE_SYSTEM_PROMPT,
             user_prompt=user_prompt,
+            max_tokens=220,
         )
         fishbone_result = response_json.get("fishbone_analysis", {})
 

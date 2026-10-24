@@ -38,6 +38,7 @@ def five_whys_node(state: InvestigationGraphState) -> Dict[str, Any]:
         response_json = GroqClientManager.generate_chat_json(
             system_prompt=FIVE_WHYS_SYSTEM_PROMPT,
             user_prompt=user_prompt,
+            max_tokens=240,
         )
         five_whys_result = response_json.get("five_whys", {})
 
