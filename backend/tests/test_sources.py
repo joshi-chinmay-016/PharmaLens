@@ -100,3 +100,56 @@ def test_attach_source_to_investigation(client):
     linked_docs = check_inv.json()["source_documents"]
     assert len(linked_docs) == 1
     assert linked_docs[0]["id"] == src_id
+
+def test_structured_file_intake_txt(client):
+    files = {"file": ("deviation_memo.txt", io.BytesIO(b"Critical temperature deviation observed in Tray Dryer 02."), "text/plain")}
+    res = client.post("/api/sources/file", files=files)
+    assert res.status_code == 201
+    data = res.json()
+    assert data["source_id"].startswith("SRC-TXT-")
+    assert data["source_type"] == "text"
+    assert "Tray Dryer 02" in data["extracted_text"]
+
+def test_structured_file_intake_csv(client):
+    csv_data = b"SampleID,Assay_Pct,Solvent_PPM\nSMP-01,99.2,420\nSMP-02,98.7,680\n"
+    files = {"file": ("qc_results.csv", io.BytesIO(csv_data), "text/csv")}
+    res = client.post("/api/sources/file", files=files)
+    assert res.status_code == 201
+    data = res.json()
+    assert data["source_id"].startswith("SRC-CSV-")
+    assert data["source_type"] == "csv"
+    assert "SampleID" in data["extracted_text"]
+    assert "680" in data["extracted_text"]
+
+def test_structured_file_intake_json(client):
+    json_data = b'{"batch": "API-2026-014", "test": "Residual Solvent", "status": "OOS", "value": 0.65}'
+    files = {"file": ("lims_export.json", io.BytesIO(json_data), "application/json")}
+    res = client.post("/api/sources/file", files=files)
+    assert res.status_code == 201
+    data = res.json()
+    assert data["source_id"].startswith("SRC-JSON-")
+    assert data["source_type"] == "json"
+    assert "API-2026-014" in data["extracted_text"]
+
+def test_structured_file_intake_eml(client):
+    eml_data = (
+        b"From: qa-alert@pharma.com\r\n"
+        b"To: investigator@pharma.com\r\n"
+        b"Subject: Notification of Analytical Deviation\r\n"
+        b"Date: Mon, 16 Nov 2026 10:00:00 +0000\r\n"
+        b"\r\n"
+        b"Please review batch API-2026-014 as the solvent test exceeded acceptance limit."
+    )
+    files = {"file": ("email_alert.eml", io.BytesIO(eml_data), "message/rfc822")}
+    res = client.post("/api/sources/file", files=files)
+    assert res.status_code == 201
+    data = res.json()
+    assert data["source_id"].startswith("SRC-EML-")
+    assert data["source_type"] == "email"
+    assert "Notification of Analytical Deviation" in data["extracted_text"]
+
+def test_structured_file_intake_invalid_format(client):
+    files = {"file": ("malicious.exe", io.BytesIO(b"MZ1234567890"), "application/octet-stream")}
+    res = client.post("/api/sources/file", files=files)
+    assert res.status_code == 400
+    assert "Invalid file type" in res.json()["detail"]

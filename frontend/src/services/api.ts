@@ -130,19 +130,24 @@ export const api = {
     return handleResponse<SourceDocument>(res);
   },
 
-  // Sources Intake: PDF Upload
-  async uploadPdf(file: File, investigationId?: number): Promise<SourceDocument> {
+  // Sources Intake: File Upload (Universal Structured Document: PDF, TXT, CSV, JSON, DOCX, EML)
+  async uploadFile(file: File, investigationId?: number): Promise<SourceDocument> {
     const formData = new FormData();
     formData.append('file', file);
     if (investigationId) {
       formData.append('investigation_id', investigationId.toString());
     }
 
-    const res = await fetch(`${API_BASE}/sources/pdf`, {
+    const res = await fetch(`${API_BASE}/sources/file`, {
       method: 'POST',
       body: formData,
     });
     return handleResponse<SourceDocument>(res);
+  },
+
+  // Sources Intake: PDF Upload (Alias for backward compatibility)
+  async uploadPdf(file: File, investigationId?: number): Promise<SourceDocument> {
+    return this.uploadFile(file, investigationId);
   },
 
   // Attach Source to Investigation

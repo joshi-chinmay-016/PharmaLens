@@ -8,7 +8,7 @@ class SourceDocument(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     source_id = Column(String(50), unique=True, index=True, nullable=False)
-    source_type = Column(String(50), nullable=False)  # "pasted_text", "pdf", "email"
+    source_type = Column(String(50), nullable=False)  # "pdf", "text", "pasted_text", "email", "csv", "json", "docx", etc.
     original_filename = Column(String(255), nullable=True)
     stored_filepath = Column(String(500), nullable=True)
     file_size_bytes = Column(Integer, nullable=True)

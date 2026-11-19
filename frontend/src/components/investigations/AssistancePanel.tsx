@@ -638,7 +638,7 @@ export const AssistancePanel: React.FC<AssistancePanelProps> = ({
                     className="mt-2 inline-flex items-center gap-1 text-xs font-display font-bold uppercase tracking-wider
                                text-amber-700 border-b-2 border-amber-400 hover:border-amber-600 hover:text-amber-900 transition-colors"
                   >
-                    Upload PDF or Paste Incident Text →
+                    Upload Document / Structured File or Paste Incident Text →
                   </button>
                 </div>
               ) : (

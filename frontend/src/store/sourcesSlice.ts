@@ -53,23 +53,26 @@ export const intakeEmailThunk = createAsyncThunk(
   }
 );
 
-export const uploadPdfThunk = createAsyncThunk(
-  'sources/uploadPdf',
+export const uploadFileThunk = createAsyncThunk(
+  'sources/uploadFile',
   async (
     { file, investigationId }: { file: File; investigationId?: number },
     { dispatch, rejectWithValue }
   ) => {
     try {
-      const doc = await api.uploadPdf(file, investigationId);
+      const doc = await api.uploadFile(file, investigationId);
       if (investigationId) {
         dispatch(fetchInvestigationById(investigationId));
       }
       return doc;
     } catch (err: any) {
-      return rejectWithValue(err.message || 'PDF upload or text extraction failed');
+      return rejectWithValue(err.message || 'File upload or text extraction failed');
     }
   }
 );
+
+// Backward-compatible alias for existing callers
+export const uploadPdfThunk = uploadFileThunk;
 
 export const detachSourceThunk = createAsyncThunk(
   'sources/detachSource',
@@ -126,9 +129,9 @@ export const sourcesSlice = createSlice({
       .addCase(intakeEmailThunk.pending, handlePending)
       .addCase(intakeEmailThunk.fulfilled, handleFulfilled)
       .addCase(intakeEmailThunk.rejected, handleRejected)
-      .addCase(uploadPdfThunk.pending, handlePending)
-      .addCase(uploadPdfThunk.fulfilled, handleFulfilled)
-      .addCase(uploadPdfThunk.rejected, handleRejected);
+      .addCase(uploadFileThunk.pending, handlePending)
+      .addCase(uploadFileThunk.fulfilled, handleFulfilled)
+      .addCase(uploadFileThunk.rejected, handleRejected);
   },
 });
 

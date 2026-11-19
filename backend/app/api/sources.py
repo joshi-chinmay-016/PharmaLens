@@ -40,13 +40,27 @@ def intake_email_content(
         investigation_id=payload.investigation_id
     )
 
+@router.post("/file", response_model=SourceDocumentResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/upload", response_model=SourceDocumentResponse, status_code=status.HTTP_201_CREATED)
+async def intake_structured_file(
+    file: UploadFile = File(...),
+    investigation_id: Optional[int] = Form(None),
+    db: Session = Depends(get_db)
+):
+    """Upload any valid structured document or data file (PDF, TXT, CSV, JSON, DOCX, EML, etc.)."""
+    return await DocumentService.intake_file(
+        db=db,
+        file=file,
+        investigation_id=investigation_id
+    )
+
 @router.post("/pdf", response_model=SourceDocumentResponse, status_code=status.HTTP_201_CREATED)
 async def intake_pdf_document(
     file: UploadFile = File(...),
     investigation_id: Optional[int] = Form(None),
     db: Session = Depends(get_db)
 ):
-    """Upload a PDF file and extract text locally with PyPDF."""
+    """Upload a PDF file and extract text locally with PyPDF (backwards compatible)."""
     return await DocumentService.intake_pdf(
         db=db,
         file=file,

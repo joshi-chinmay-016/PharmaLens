@@ -3,7 +3,7 @@ export type InvestigationStatus = 'Draft' | 'Under Investigation' | 'AI Analysis
 export interface SourceDocument {
   id: number;
   source_id: string;
-  source_type: 'pasted_text' | 'pdf' | 'email';
+  source_type: 'pasted_text' | 'pdf' | 'email' | 'text' | 'csv' | 'json' | 'docx' | string;
   original_filename: string | null;
   file_size_bytes: number | null;
   extracted_text: string | null;

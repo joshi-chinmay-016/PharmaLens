@@ -10,9 +10,11 @@ import {
   Copy,
   ArrowRight,
   HelpCircle,
+  Database,
+  Layers,
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store';
-import { intakeTextThunk, intakeEmailThunk, uploadPdfThunk, clearActiveSource } from '../../store/sourcesSlice';
+import { intakeTextThunk, intakeEmailThunk, uploadFileThunk, clearActiveSource } from '../../store/sourcesSlice';
 import { SourceDocument } from '../../types';
 
 interface SourceIntakeModalProps {
@@ -31,7 +33,7 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
   const dispatch = useAppDispatch();
   const { activeSource, loading, error, successMessage } = useAppSelector((state) => state.sources);
 
-  const [activeTab, setActiveTab] = useState<'text' | 'pdf' | 'email'>('text');
+  const [activeTab, setActiveTab] = useState<'text' | 'file' | 'email'>('file');
 
   // Text Tab State
   const [pastedText, setPastedText] = useState('');
@@ -43,7 +45,7 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
   const [emailDate, setEmailDate] = useState('');
   const [emailBody, setEmailBody] = useState('');
 
-  // PDF Tab State
+  // File Upload State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
 
@@ -75,15 +77,38 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
     );
   };
 
-  const handlePdfSubmit = async (e: React.FormEvent) => {
+  const handleFileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFile) return;
     await dispatch(
-      uploadPdfThunk({
+      uploadFileThunk({
         file: selectedFile,
         investigationId,
       })
     );
+  };
+
+  const isExtensionSupported = (filename: string) => {
+    const ext = '.' + filename.split('.').pop()?.toLowerCase();
+    const supported = [
+      '.pdf',
+      '.txt',
+      '.text',
+      '.log',
+      '.md',
+      '.markdown',
+      '.rtf',
+      '.eml',
+      '.msg',
+      '.csv',
+      '.tsv',
+      '.json',
+      '.docx',
+      '.xml',
+      '.html',
+      '.htm',
+    ];
+    return supported.includes(ext);
   };
 
   const handleFileDrop = (e: React.DragEvent) => {
@@ -91,7 +116,7 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
-      if (file.name.toLowerCase().endsWith('.pdf')) {
+      if (isExtensionSupported(file.name)) {
         setSelectedFile(file);
       }
     }
@@ -111,7 +136,8 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
       } else if (textTitleHint) {
         titleHint = textTitleHint;
       } else if (activeSource.original_filename) {
-        titleHint = activeSource.original_filename.replace('.pdf', '');
+        // Strip any extension cleanly
+        titleHint = activeSource.original_filename.replace(/\.[^/.]+$/, '');
       }
 
       onApplyExtractedText(activeSource.extracted_text || '', titleHint, activeSource);
@@ -167,7 +193,7 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
               Incident Source Document Intake
             </h3>
             <p className="text-xs font-mono text-slate-300">
-              Supply source material via pasted text, email details, or PDF report.
+              Ingest structured files (PDF, TXT, CSV, JSON, DOCX, EML), incident text, or email responses.
             </p>
           </div>
           <button
@@ -179,11 +205,23 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
         </div>
 
         {/* Tab Selection */}
-        <div className="flex border-b-2 border-ink bg-paper px-6 pt-3 gap-2">
+        <div className="flex border-b-2 border-ink bg-paper px-6 pt-3 gap-2 overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => setActiveTab('file')}
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-display font-bold uppercase tracking-wider border-2 border-b-0 border-ink transition-all whitespace-nowrap ${
+              activeTab === 'file'
+                ? 'bg-white text-ink -mb-[2px] shadow-brutal-xs'
+                : 'bg-paper text-muted hover:text-ink'
+            }`}
+          >
+            <Upload className="w-3.5 h-3.5 text-blue-700" />
+            <span>Structured File Upload</span>
+          </button>
           <button
             type="button"
             onClick={() => setActiveTab('text')}
-            className={`flex items-center gap-2 px-4 py-2 text-xs font-display font-bold uppercase tracking-wider border-2 border-b-0 border-ink transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-display font-bold uppercase tracking-wider border-2 border-b-0 border-ink transition-all whitespace-nowrap ${
               activeTab === 'text'
                 ? 'bg-white text-ink -mb-[2px] shadow-brutal-xs'
                 : 'bg-paper text-muted hover:text-ink'
@@ -194,27 +232,15 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('pdf')}
-            className={`flex items-center gap-2 px-4 py-2 text-xs font-display font-bold uppercase tracking-wider border-2 border-b-0 border-ink transition-all ${
-              activeTab === 'pdf'
-                ? 'bg-white text-ink -mb-[2px] shadow-brutal-xs'
-                : 'bg-paper text-muted hover:text-ink'
-            }`}
-          >
-            <Upload className="w-3.5 h-3.5 text-blue-700" />
-            <span>PDF Upload</span>
-          </button>
-          <button
-            type="button"
             onClick={() => setActiveTab('email')}
-            className={`flex items-center gap-2 px-4 py-2 text-xs font-display font-bold uppercase tracking-wider border-2 border-b-0 border-ink transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-display font-bold uppercase tracking-wider border-2 border-b-0 border-ink transition-all whitespace-nowrap ${
               activeTab === 'email'
                 ? 'bg-white text-ink -mb-[2px] shadow-brutal-xs'
                 : 'bg-paper text-muted hover:text-ink'
             }`}
           >
             <Mail className="w-3.5 h-3.5 text-indigo-700" />
-            <span>Pasted Email</span>
+            <span>Email Response</span>
           </button>
         </div>
 
@@ -230,15 +256,27 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
           {/* Result Preview if activeSource exists */}
           {activeSource ? (
             <div className="border-2 border-ink bg-paper p-5 shadow-brutal-sm space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b border-ink">
+              <div className="flex items-center justify-between pb-2 border-b border-ink flex-wrap gap-2">
                 <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider text-teal-deep">
                   <CheckCircle2 className="w-4 h-4 text-teal-primary" />
-                  Source Intake Processed ({activeSource.source_type.replace('_', ' ')})
+                  Source Intake Processed ({activeSource.source_type.toUpperCase()})
                 </span>
                 <span className="text-[11px] font-mono text-muted">
                   ID: {activeSource.source_id}
                 </span>
               </div>
+
+              {activeSource.original_filename && (
+                <div className="text-xs font-mono text-ink flex items-center gap-2">
+                  <span className="font-bold text-muted">File:</span>
+                  <span className="font-semibold">{activeSource.original_filename}</span>
+                  {activeSource.file_size_bytes && (
+                    <span className="text-[10px] text-muted">
+                      ({(activeSource.file_size_bytes / 1024).toFixed(1)} KB)
+                    </span>
+                  )}
+                </div>
+              )}
 
               {activeSource.extraction_warning && (
                 <div className="p-2.5 bg-amber-100 border-2 border-ink text-amber-900 text-xs shadow-brutal-xs flex items-start gap-2 font-mono font-bold">
@@ -269,7 +307,95 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
             </div>
           ) : (
             <>
-              {/* Tab 1: Pasted Text */}
+              {/* Tab 1: Multi-Format Structured File Upload */}
+              {activeTab === 'file' && (
+                <form onSubmit={handleFileSubmit} className="space-y-4">
+                  <div
+                    onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                    onDragLeave={() => setDragActive(false)}
+                    onDrop={handleFileDrop}
+                    className={`border-2 border-dashed p-6 text-center transition-all ${
+                      dragActive ? 'border-teal-primary bg-teal-light' : 'border-ink bg-paper shadow-brutal-xs'
+                    }`}
+                  >
+                    <Upload className="w-8 h-8 text-ink mx-auto mb-2" />
+                    <p className="text-xs font-display font-bold uppercase text-ink">
+                      Drag and drop your incident document or structured file here, or browse
+                    </p>
+                    <p className="text-[11px] font-mono text-muted mt-1">
+                      Accepts PDF, Text, Markdown, CSV, JSON, Word (DOCX), or Email (.eml) up to 10MB.
+                    </p>
+
+                    {/* Supported format badges */}
+                    <div className="flex flex-wrap items-center justify-center gap-1.5 mt-3">
+                      <span className="text-[9px] font-mono font-bold bg-white text-ink border border-ink px-2 py-0.5 shadow-brutal-xs">PDF</span>
+                      <span className="text-[9px] font-mono font-bold bg-white text-ink border border-ink px-2 py-0.5 shadow-brutal-xs">TXT / LOG</span>
+                      <span className="text-[9px] font-mono font-bold bg-white text-ink border border-ink px-2 py-0.5 shadow-brutal-xs">CSV / TSV</span>
+                      <span className="text-[9px] font-mono font-bold bg-white text-ink border border-ink px-2 py-0.5 shadow-brutal-xs">JSON</span>
+                      <span className="text-[9px] font-mono font-bold bg-white text-ink border border-ink px-2 py-0.5 shadow-brutal-xs">DOCX</span>
+                      <span className="text-[9px] font-mono font-bold bg-white text-ink border border-ink px-2 py-0.5 shadow-brutal-xs">EMAIL (.EML)</span>
+                    </div>
+
+                    <input
+                      type="file"
+                      accept=".pdf,.txt,.text,.log,.md,.markdown,.rtf,.eml,.msg,.csv,.tsv,.json,.docx,.xml,.html,.htm"
+                      id="universal-file-upload-input"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setSelectedFile(e.target.files[0]);
+                        }
+                      }}
+                    />
+                    <label
+                      htmlFor="universal-file-upload-input"
+                      className="btn-brutal-secondary text-xs px-3.5 py-1.5 mt-3.5 inline-block cursor-pointer shadow-brutal-xs"
+                    >
+                      Browse Files
+                    </label>
+                  </div>
+
+                  {selectedFile && (
+                    <div className="flex items-center justify-between p-3 bg-paper border-2 border-ink shadow-brutal-xs text-xs font-mono">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-teal-deep" />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold text-ink">{selectedFile.name}</p>
+                            <span className="text-[9px] bg-ink text-white px-1.5 py-0.2 font-mono uppercase font-bold">
+                              {selectedFile.name.split('.').pop()?.toUpperCase()}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-muted">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedFile(null)}
+                        className="text-ink hover:text-rose-700 p-1"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-2">
+                    <span className="text-[10px] font-mono text-muted uppercase">
+                      Local parsing guarantees zero unredacted document leakage.
+                    </span>
+                    <button
+                      type="submit"
+                      disabled={loading || !selectedFile}
+                      className="btn-brutal-primary text-xs px-4 py-2"
+                    >
+                      {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                      <span>Upload &amp; Extract Document</span>
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* Tab 2: Pasted Text */}
               {activeTab === 'text' && (
                 <form onSubmit={handleTextSubmit} className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -321,79 +447,7 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
                 </form>
               )}
 
-              {/* Tab 2: PDF Upload */}
-              {activeTab === 'pdf' && (
-                <form onSubmit={handlePdfSubmit} className="space-y-4">
-                  <div
-                    onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-                    onDragLeave={() => setDragActive(false)}
-                    onDrop={handleFileDrop}
-                    className={`border-2 border-dashed p-6 text-center transition-all ${
-                      dragActive ? 'border-teal-primary bg-teal-light' : 'border-ink bg-paper shadow-brutal-xs'
-                    }`}
-                  >
-                    <Upload className="w-8 h-8 text-ink mx-auto mb-2" />
-                    <p className="text-xs font-display font-bold uppercase text-ink">
-                      Drag and drop your incident PDF here, or browse
-                    </p>
-                    <p className="text-[11px] font-mono text-muted mt-1">
-                      Text-based PDF up to 10MB. Text extracted locally with PyPDF.
-                    </p>
-                    <input
-                      type="file"
-                      accept=".pdf"
-                      id="pdf-upload-input"
-                      className="hidden"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          setSelectedFile(e.target.files[0]);
-                        }
-                      }}
-                    />
-                    <label
-                      htmlFor="pdf-upload-input"
-                      className="btn-brutal-secondary text-xs px-3.5 py-1.5 mt-3 inline-block cursor-pointer shadow-brutal-xs"
-                    >
-                      Browse Files
-                    </label>
-                  </div>
-
-                  {selectedFile && (
-                    <div className="flex items-center justify-between p-3 bg-paper border-2 border-ink shadow-brutal-xs text-xs font-mono">
-                      <div className="flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-teal-deep" />
-                        <div>
-                          <p className="font-bold text-ink">{selectedFile.name}</p>
-                          <p className="text-[10px] text-muted">{(selectedFile.size / 1024).toFixed(1)} KB</p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedFile(null)}
-                        className="text-ink hover:text-rose-700 p-1"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between pt-2">
-                    <span className="text-[10px] font-mono text-muted uppercase">
-                      Scanned PDFs will be detected and flagged.
-                    </span>
-                    <button
-                      type="submit"
-                      disabled={loading || !selectedFile}
-                      className="btn-brutal-primary text-xs px-4 py-2"
-                    >
-                      {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                      <span>Upload &amp; Extract PDF</span>
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              {/* Tab 3: Pasted Email */}
+              {/* Tab 3: Pasted Email Response */}
               {activeTab === 'email' && (
                 <form onSubmit={handleEmailSubmit} className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
@@ -433,7 +487,7 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
                   </div>
                   <div>
                     <label className="text-xs font-mono font-bold uppercase tracking-wider text-ink block mb-1">
-                      Email Body <span className="text-rose-600">*</span>
+                      Email Body / Response <span className="text-rose-600">*</span>
                     </label>
                     <textarea
                       rows={6}
@@ -441,7 +495,7 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
                       minLength={5}
                       value={emailBody}
                       onChange={(e) => setEmailBody(e.target.value)}
-                      placeholder="Paste the raw email notification or incident memo content..."
+                      placeholder="Paste the raw email notification, analyst reply, or incident memo content..."
                       className="w-full text-xs font-mono px-3 py-2 border-2 border-ink bg-white shadow-brutal-xs focus:shadow-brutal focus:outline-none leading-relaxed"
                     />
                   </div>
@@ -455,7 +509,7 @@ export const SourceIntakeModal: React.FC<SourceIntakeModalProps> = ({
                       className="btn-brutal-primary text-xs px-4 py-2"
                     >
                       {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                      <span>Save Email Source</span>
+                      <span>Save Email Response</span>
                     </button>
                   </div>
                 </form>
